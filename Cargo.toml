@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/*"]
+members = ["xtask", "crates/*"]
 resolver = "2"
 
 [workspace.package]
@@ -9,14 +9,56 @@ version = "0.1.0"
 rust-version = "1.91.0"
 readme = "README.md"
 authors = ["Clay Loveless <clay@loveless.net>"]
-description = "Got a skill issue? madskills fixes it -- the toolchain for madskilling: lint, fmt, and wrangle Agent Skills like you mean it."
-keywords = []
-categories = []
+repository = "https://github.com/madskilling/madskills"
+homepage = "https://madskill.ing"
+documentation = "https://docs.rs/madskills"
+description = "The toolchain for madskilling: lint, format, and wrangle Agent Skills like you mean it."
+keywords = [
+  "agent-skills",
+  "madskilling",
+  "markdown",
+  "linter",
+  "markdown-linter",
+  "static-analysis",
+  "documentation",
+]
+categories = ["command-line-utilities", "development-tools", "text-processing"]
+
+
+# Optimize dependencies in dev mode for faster tests
+# (keeps main crate unoptimized for fast incremental builds)
+[profile.dev.package."*"]
+opt-level = 2
+
+# Reduce debug info size (line tables only, no variable info)
+# Light optimization for better runtime without killing incremental builds
+[profile.dev]
+debug = "line-tables-only"
+opt-level = 1
+# On macOS, split debug info for faster linking
+split-debuginfo = "unpacked"
+
+# Test profile with full debug symbols for profiling
+[profile.test]
+inherits = "dev"
+debug = true
+
+# Release profile with reduced debug info for smaller binaries
+[profile.release]
+debug = "line-tables-only"
 
 # The profile that 'dist' will build with
 [profile.dist]
 inherits = "release"
 lto = "thin"
+
+# Debug-friendly profile for investigating mysteries (hangs, crashes, etc.)
+# Usage: cargo build --profile mystery
+[profile.mystery]
+inherits = "release"
+opt-level = 1
+debug = true
+strip = false
 
 # Config for 'dist'
 [workspace.metadata.dist]

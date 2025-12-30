@@ -5,9 +5,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 authors.workspace = true
-description = "CLI tool for validating and managing Agent Skills repositories"
-repository = "https://github.com/madskilling/madskills"
-homepage = "https://github.com/madskilling/madskills"
+description.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
 
 [[bin]]
 name = "madskills"
