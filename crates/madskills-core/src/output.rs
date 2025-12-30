@@ -39,34 +39,97 @@ impl OutputFormatter {
         let mut output = String::new();
         let mut total_errors = 0;
         let mut total_warnings = 0;
+        let mut total_bp_violations = 0;
 
         for result in results {
-            if result.errors.is_empty() && result.warnings.is_empty() {
+            if result.errors.is_empty()
+                && result.warnings.is_empty()
+                && result.best_practice_violations.is_empty()
+            {
                 continue;
             }
 
             output.push_str(&format!("\n{}\n", result.skill_path.display()));
 
+            // Spec errors
             for error in &result.errors {
                 output.push_str(&format!("  [ERROR] {}\n", error.message));
                 total_errors += 1;
             }
 
+            // Spec warnings
             for warning in &result.warnings {
                 output.push_str(&format!("  [WARN]  {}\n", warning.message));
                 total_warnings += 1;
+            }
+
+            // Best practice violations
+            for violation in &result.best_practice_violations {
+                let icon = match violation.severity {
+                    crate::models::Severity::Error => "[BP-ERROR]",
+                    crate::models::Severity::Warning => "[BP-WARN] ",
+                    crate::models::Severity::Info => "[BP-INFO] ",
+                };
+
+                let location = self.format_violation_location(&violation.location);
+                output.push_str(&format!(
+                    "  {} [{}]{} {}\n",
+                    icon,
+                    violation.code.as_str(),
+                    location,
+                    violation.message
+                ));
+                total_bp_violations += 1;
+
+                if violation.severity == crate::models::Severity::Error {
+                    total_errors += 1;
+                } else if violation.severity == crate::models::Severity::Warning {
+                    total_warnings += 1;
+                }
             }
         }
 
         if total_errors > 0 || total_warnings > 0 {
             output.push('\n');
             output.push_str(&format!(
-                "Found {} error(s) and {} warning(s)\n",
+                "Found {} error(s), {} warning(s)",
                 total_errors, total_warnings
             ));
+            if total_bp_violations > 0 {
+                output.push_str(&format!(" ({} best practice)", total_bp_violations));
+            }
+            output.push('\n');
         }
 
         output
+    }
+
+    /// Format violation location for display
+    fn format_violation_location(
+        &self,
+        location: &Option<crate::models::ViolationLocation>,
+    ) -> String {
+        use crate::models::ViolationLocation;
+
+        match location {
+            Some(ViolationLocation::Frontmatter { field }) => format!(" [{}]", field),
+            Some(ViolationLocation::File { path, line }) => {
+                if let Some(l) = line {
+                    format!(" [{}:{}]", path.display(), l)
+                } else {
+                    format!(" [{}]", path.display())
+                }
+            }
+            Some(ViolationLocation::SkillBody { line }) => format!(" [line {}]", line),
+            Some(ViolationLocation::Script { path, line }) => {
+                if let Some(l) = line {
+                    format!(" [{}:{}]", path.display(), l)
+                } else {
+                    format!(" [{}]", path.display())
+                }
+            }
+            None => String::new(),
+        }
     }
 
     /// Format as JSON
@@ -78,6 +141,7 @@ impl OutputFormatter {
                     skill_path: r.skill_path.display().to_string(),
                     errors: r.errors.iter().map(|e| e.message.clone()).collect(),
                     warnings: r.warnings.iter().map(|w| w.message.clone()).collect(),
+                    best_practice_violations: r.best_practice_violations.clone(),
                 })
                 .collect(),
         };
@@ -96,6 +160,7 @@ struct JsonValidationResult {
     skill_path: String,
     errors: Vec<String>,
     warnings: Vec<String>,
+    best_practice_violations: Vec<crate::models::BestPracticeViolation>,
 }
 
 #[cfg(test)]

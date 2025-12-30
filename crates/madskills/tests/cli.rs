@@ -357,3 +357,123 @@ fn test_lint_extra_fields() {
         .code(2)
         .stdout(predicate::str::contains("Unexpected fields"));
 }
+
+// Best practices tests
+
+#[test]
+fn test_lint_best_practices_violations() {
+    let temp = TempDir::new().unwrap();
+    let skill_dir = temp.path().join(".github/skills/test-skill");
+    fs::create_dir_all(&skill_dir).unwrap();
+
+    // Skill with multiple best practice violations:
+    // - AS003: First person ("I help")
+    // - AS014: No usage triggers
+    fs::write(
+        skill_dir.join("SKILL.md"),
+        "---\nname: test-skill\ndescription: I help with testing\n---\n# Test Skill\n",
+    )
+    .unwrap();
+
+    let mut cmd = Command::cargo_bin("madskills").unwrap();
+    cmd.arg("lint")
+        .arg(temp.path())
+        .assert()
+        .success() // Warnings don't cause failure in default mode
+        .code(0)
+        .stdout(predicate::str::contains("BP-WARN"))
+        .stdout(predicate::str::contains("AS003"));
+}
+
+#[test]
+fn test_lint_no_best_practices_flag() {
+    let temp = TempDir::new().unwrap();
+    let skill_dir = temp.path().join(".github/skills/test-skill");
+    fs::create_dir_all(&skill_dir).unwrap();
+
+    // Skill with best practice violations
+    fs::write(
+        skill_dir.join("SKILL.md"),
+        "---\nname: test-skill\ndescription: I help with testing\n---\n# Test Skill\n",
+    )
+    .unwrap();
+
+    let mut cmd = Command::cargo_bin("madskills").unwrap();
+    cmd.arg("lint")
+        .arg("--no-best-practices")
+        .arg(temp.path())
+        .assert()
+        .success() // Should succeed when best practices disabled
+        .code(0);
+}
+
+#[test]
+fn test_lint_best_practices_strict_mode() {
+    let temp = TempDir::new().unwrap();
+    let skill_dir = temp.path().join(".github/skills/test-skill");
+    fs::create_dir_all(&skill_dir).unwrap();
+
+    // Skill with best practice violations
+    fs::write(
+        skill_dir.join("SKILL.md"),
+        "---\nname: test-skill\ndescription: I help with testing\n---\n# Test Skill\n",
+    )
+    .unwrap();
+
+    let mut cmd = Command::cargo_bin("madskills").unwrap();
+    cmd.arg("lint")
+        .arg("--strict")
+        .arg(temp.path())
+        .assert()
+        .failure()
+        .code(2)
+        .stdout(predicate::str::contains("BP-ERROR")); // In strict mode, violations become errors
+}
+
+#[test]
+fn test_lint_best_practices_reserved_word() {
+    let temp = TempDir::new().unwrap();
+    let skill_dir = temp.path().join(".github/skills/claude-helper");
+    fs::create_dir_all(&skill_dir).unwrap();
+
+    // AS016: Reserved word in name
+    fs::write(
+        skill_dir.join("SKILL.md"),
+        "---\nname: claude-helper\ndescription: For helping with Claude tasks\n---\n# Helper\n",
+    )
+    .unwrap();
+
+    let mut cmd = Command::cargo_bin("madskills").unwrap();
+    cmd.arg("lint")
+        .arg(temp.path())
+        .assert()
+        .success()
+        .code(0)
+        .stdout(predicate::str::contains("AS016"))
+        .stdout(predicate::str::contains("reserved words"));
+}
+
+#[test]
+fn test_lint_best_practices_json_output() {
+    let temp = TempDir::new().unwrap();
+    let skill_dir = temp.path().join(".github/skills/test-skill");
+    fs::create_dir_all(&skill_dir).unwrap();
+
+    // Skill with best practice violations
+    fs::write(
+        skill_dir.join("SKILL.md"),
+        "---\nname: test-skill\ndescription: I help\n---\n# Test\n",
+    )
+    .unwrap();
+
+    let mut cmd = Command::cargo_bin("madskills").unwrap();
+    cmd.arg("lint")
+        .arg("--format")
+        .arg("json")
+        .arg(temp.path())
+        .assert()
+        .success()
+        .code(0)
+        .stdout(predicate::str::contains("best_practice_violations"))
+        .stdout(predicate::str::contains("AS003"));
+}

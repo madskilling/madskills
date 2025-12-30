@@ -40,6 +40,10 @@ pub struct LintArgs {
     #[arg(long)]
     pub mdlint_config: Option<PathBuf>,
 
+    /// Disable best practices validation
+    #[arg(long)]
+    pub no_best_practices: bool,
+
     /// Additional SKILL.md glob(s) to include (repeatable)
     #[arg(long)]
     pub include: Vec<String>,
@@ -82,6 +86,7 @@ pub fn cmd_lint(args: LintArgs, quiet: bool) -> Result<()> {
         strict: args.strict,
         check_spec: !args.no_spec,
         check_markdown: !args.no_mdlint,
+        check_best_practices: !args.no_best_practices,
         mdlint_config: args.mdlint_config,
     });
 
@@ -117,8 +122,10 @@ pub fn cmd_lint(args: LintArgs, quiet: bool) -> Result<()> {
     // Determine exit code
     let has_errors = results.iter().any(|r| !r.errors.is_empty());
     let has_warnings = results.iter().any(|r| !r.warnings.is_empty());
+    let has_bp_errors = results.iter().any(|r| r.has_bp_errors());
+    let has_bp_warnings = results.iter().any(|r| r.has_bp_warnings());
 
-    if has_errors || (args.strict && has_warnings) {
+    if has_errors || has_bp_errors || (args.strict && (has_warnings || has_bp_warnings)) {
         std::process::exit(2);
     }
 

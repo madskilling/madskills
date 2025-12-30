@@ -205,8 +205,7 @@ just cov
 madskills/
 ├── crates/
 │   ├── madskills/        # CLI binary
-│   ├── madskills-core/   # Core library (discovery, parsing, validation, markdown)
-│   └── madskills-rules/  # Linting rules (extensible)
+│   └── madskills-core/   # Core library (discovery, parsing, validation, markdown, best practices)
 ├── PLAN.md               # Implementation specification
 └── README.md
 ```

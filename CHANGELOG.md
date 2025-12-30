@@ -30,6 +30,10 @@ The format is based on *Keep a Changelog*, and this project adheres to *Semantic
 
 - Renamed `--no-rumdl` flag to `--no-mdlint` for consistency
 
+### Removed
+
+- `madskills-rules` crate (was an unused placeholder)
+
 ## [0.1.0] - 2025-12-30
 
 ### Added
@@ -64,10 +68,9 @@ The format is based on *Keep a Changelog*, and this project adheres to *Semantic
 - Global options: `-C` (chdir), `-q` (quiet), `-v` (verbose), `--color`
 - Skill discovery in `.github/skills/**/SKILL.md` and `.claude/skills/**/SKILL.md`
 - Respects .gitignore during discovery
-- Three-crate architecture:
+- Two-crate architecture:
   - `madskills` - CLI binary
   - `madskills-core` - Core library (reusable)
-  - `madskills-rules` - Linting rules (extensible)
 - Comprehensive test suite (37 tests: 13 integration + 24 unit)
 - CI/CD workflow with fmt, clippy, test, and MSRV checks
 

@@ -1,5 +1,14 @@
 //! AgentSkills specification validation
 
+mod best_practices;
+mod helpers;
+
+#[cfg(test)]
+#[path = "validator/best_practices_tests/mod.rs"]
+mod best_practices_tests;
+
+pub use best_practices::BestPracticesValidator;
+
 use crate::models::{
     ALLOWED_FRONTMATTER_FIELDS, Skill, ValidationError, ValidationErrorKind, ValidationResult,
 };
@@ -15,8 +24,22 @@ pub struct ValidationConfig {
     pub check_spec: bool,
     /// Enable markdown linting
     pub check_markdown: bool,
+    /// Enable best practices validation
+    pub check_best_practices: bool,
     /// Path to mdlint config file
     pub mdlint_config: Option<std::path::PathBuf>,
+}
+
+impl Default for ValidationConfig {
+    fn default() -> Self {
+        Self {
+            strict: false,
+            check_spec: true,
+            check_markdown: false,
+            check_best_practices: true,
+            mdlint_config: None,
+        }
+    }
 }
 
 /// Validator for AgentSkills specification
@@ -40,6 +63,11 @@ impl Validator {
 
         if self.config.check_markdown {
             self.validate_markdown(skill, &mut result);
+        }
+
+        if self.config.check_best_practices {
+            let bp_validator = BestPracticesValidator::new(self.config.strict);
+            result.best_practice_violations = bp_validator.validate(skill);
         }
 
         result
@@ -349,6 +377,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            check_best_practices: false,
             mdlint_config: None,
         });
 
@@ -363,6 +392,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            check_best_practices: false,
             mdlint_config: None,
         });
 
@@ -384,6 +414,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            check_best_practices: false,
             mdlint_config: None,
         });
 
@@ -404,6 +435,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            check_best_practices: false,
             mdlint_config: None,
         });
 
@@ -424,6 +456,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            check_best_practices: false,
             mdlint_config: None,
         });
 
@@ -444,6 +477,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            check_best_practices: false,
             mdlint_config: None,
         });
 
@@ -464,6 +498,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            check_best_practices: false,
             mdlint_config: None,
         });
 
@@ -507,6 +542,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            check_best_practices: false,
             mdlint_config: None,
         });
 
@@ -522,6 +558,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            check_best_practices: false,
             mdlint_config: None,
         });
 
@@ -549,6 +586,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            check_best_practices: false,
             mdlint_config: None,
         });
 
