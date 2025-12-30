@@ -127,6 +127,14 @@ jobs:
             curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
             echo "$HOME/.cargo/bin" >> $GITHUB_PATH
           fi
+      - name: "Generate manpages"
+        if: "runner.os != 'Windows'"
+        run: |
+          set -euo pipefail
+          out_dir="dist/share/man/man1"
+          mkdir -p "$out_dir"
+          cargo run --package xtask -- man --out-dir "$out_dir"
+        shell: "bash"
       - uses: swatinem/rust-cache@v2
         with:
           key: ${{ join(matrix.targets, '-') }}

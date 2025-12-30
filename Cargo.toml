@@ -1,5 +1,6 @@
 [workspace]
 members = ["xtask", "crates/*"]
+default-members = ["crates/*"]
 resolver = "2"
 
 [workspace.package]
@@ -23,7 +24,6 @@ keywords = [
   "documentation",
 ]
 categories = ["command-line-utilities", "development-tools", "text-processing"]
-
 
 # Optimize dependencies in dev mode for faster tests
 # (keeps main crate unoptimized for fast incremental builds)
@@ -80,6 +80,8 @@ tap = "madskilling/homebrew-brew"
 publish-jobs = ["homebrew"]
 # if yaml format issues continue to be a problem, turn this on
 # allow-dirty = ["ci"]
+include = ["dist/share"]
+github-build-setup = "../dist-build-setup.yml"
 pr-run-mode = "upload"
 github-release = "auto"
 cargo-auditable = true
