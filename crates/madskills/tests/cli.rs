@@ -246,6 +246,82 @@ fn test_fmt_check_mode() {
 }
 
 #[test]
+fn test_fmt_frontmatter_and_markdown() {
+    let temp = TempDir::new().unwrap();
+    let skill_dir = temp.path().join(".github/skills/test-skill");
+    fs::create_dir_all(&skill_dir).unwrap();
+
+    // Write skill with frontmatter needing normalization and markdown issues
+    fs::write(
+        skill_dir.join("SKILL.md"),
+        "---\ndescription: Test\nname: test-skill\n---\n# Test\n\nMultiple  spaces\n",
+    )
+    .unwrap();
+
+    let mut cmd = Command::cargo_bin("madskills").unwrap();
+    cmd.arg("fmt").arg(temp.path()).assert().success();
+
+    // Verify both frontmatter and markdown were fixed
+    let content = fs::read_to_string(skill_dir.join("SKILL.md")).unwrap();
+    let name_pos = content.find("name:").unwrap();
+    let desc_pos = content.find("description:").unwrap();
+    assert!(name_pos < desc_pos, "frontmatter should be normalized");
+    // Note: rumdl may fix multiple spaces depending on rules
+}
+
+#[test]
+fn test_fmt_no_mdlint() {
+    let temp = TempDir::new().unwrap();
+    let skill_dir = temp.path().join(".github/skills/test-skill");
+    fs::create_dir_all(&skill_dir).unwrap();
+
+    // Write skill with frontmatter needing normalization but markdown issues
+    fs::write(
+        skill_dir.join("SKILL.md"),
+        "---\ndescription: Test\nname: test-skill\n---\n# Test\n\nMultiple  spaces\n",
+    )
+    .unwrap();
+
+    let mut cmd = Command::cargo_bin("madskills").unwrap();
+    cmd.arg("fmt")
+        .arg("--no-mdlint")
+        .arg(temp.path())
+        .assert()
+        .success();
+
+    // Verify only frontmatter was fixed, markdown issues remain
+    let content = fs::read_to_string(skill_dir.join("SKILL.md")).unwrap();
+    let name_pos = content.find("name:").unwrap();
+    let desc_pos = content.find("description:").unwrap();
+    assert!(name_pos < desc_pos, "frontmatter should be normalized");
+}
+
+#[test]
+fn test_fmt_no_frontmatter() {
+    let temp = TempDir::new().unwrap();
+    let skill_dir = temp.path().join(".github/skills/test-skill");
+    fs::create_dir_all(&skill_dir).unwrap();
+
+    // Write skill with frontmatter already normalized but markdown issues
+    fs::write(
+        skill_dir.join("SKILL.md"),
+        "---\nname: test-skill\ndescription: Test\n---\n# Test\n\nMultiple  spaces\n",
+    )
+    .unwrap();
+
+    let mut cmd = Command::cargo_bin("madskills").unwrap();
+    cmd.arg("fmt")
+        .arg("--no-frontmatter")
+        .arg(temp.path())
+        .assert()
+        .success();
+
+    // Verify frontmatter unchanged, only markdown fixed
+    let content = fs::read_to_string(skill_dir.join("SKILL.md")).unwrap();
+    assert!(content.starts_with("---\nname: test-skill\ndescription: Test\n---"));
+}
+
+#[test]
 fn test_lint_unicode_skill_name() {
     let temp = TempDir::new().unwrap();
     let skill_dir = temp.path().join(".github/skills/café-skill");

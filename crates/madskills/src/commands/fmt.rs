@@ -33,11 +33,15 @@ pub struct FmtArgs {
 
     /// Do not apply rumdl-based fixes
     #[arg(long)]
-    pub no_rumdl: bool,
+    pub no_mdlint: bool,
 
     /// Do not rewrite YAML frontmatter
     #[arg(long)]
     pub no_frontmatter: bool,
+
+    /// Path to mdlint config file
+    #[arg(long)]
+    pub mdlint_config: Option<PathBuf>,
 }
 
 #[derive(clap::ValueEnum, Clone, Copy)]
@@ -72,30 +76,78 @@ pub fn cmd_fmt(args: FmtArgs, quiet: bool) -> Result<()> {
         let content = std::fs::read_to_string(&skill.skill_md_path)
             .with_context(|| format!("Failed to read {}", skill.skill_md_path.display()))?;
 
-        // For now, we just normalize the frontmatter format
-        // Future: integrate with rumdl for markdown formatting
-        let formatted_content = if !args.no_frontmatter {
-            normalize_frontmatter(&content, &skill.skill_md_path)?
-        } else {
-            content.clone()
-        };
+        let mut modified = false;
+        let mut current_content = content.clone();
 
-        // Check if changes are needed
-        if formatted_content != content {
+        // Step 1: Frontmatter normalization (unless --no-frontmatter)
+        if !args.no_frontmatter {
+            let normalized = normalize_frontmatter(&current_content, &skill.skill_md_path)?;
+            if normalized != current_content {
+                current_content = normalized;
+                modified = true;
+            }
+        }
+
+        // Step 2: Markdown formatting (unless --no-mdlint)
+        if !args.no_mdlint {
+            // Write current content to temp file for markdown formatting
+            if !args.check {
+                std::fs::write(&skill.skill_md_path, &current_content).with_context(|| {
+                    format!(
+                        "Failed to write temp content to {}",
+                        skill.skill_md_path.display()
+                    )
+                })?;
+            }
+
+            // Apply markdown fixes
+            let markdown_changed = madskills_core::markdown::format_markdown(
+                &skill.skill_md_path,
+                args.check,
+                args.mdlint_config.as_deref(),
+            )
+            .with_context(|| {
+                format!(
+                    "Failed to format markdown in {}",
+                    skill.skill_md_path.display()
+                )
+            })?;
+
+            if markdown_changed {
+                modified = true;
+                if !args.check {
+                    // Re-read the file after markdown formatting
+                    current_content =
+                        std::fs::read_to_string(&skill.skill_md_path).with_context(|| {
+                            format!("Failed to read formatted {}", skill.skill_md_path.display())
+                        })?;
+                }
+            }
+        }
+
+        // Handle check mode and output
+        if modified {
             changes_needed = true;
             formatted_count += 1;
 
-            if !args.check {
-                // Write formatted content
-                std::fs::write(&skill.skill_md_path, &formatted_content).with_context(|| {
-                    format!("Failed to write {}", skill.skill_md_path.display())
+            if args.check {
+                if !quiet {
+                    println!("Would format: {}", skill.skill_md_path.display());
+                }
+                // Restore original content in check mode
+                std::fs::write(&skill.skill_md_path, &content).ok();
+            } else {
+                // Make sure final content is written
+                std::fs::write(&skill.skill_md_path, &current_content).with_context(|| {
+                    format!(
+                        "Failed to write final content to {}",
+                        skill.skill_md_path.display()
+                    )
                 })?;
 
                 if !quiet {
                     println!("Formatted: {}", skill.skill_md_path.display());
                 }
-            } else if !quiet {
-                println!("Would format: {}", skill.skill_md_path.display());
             }
         }
     }

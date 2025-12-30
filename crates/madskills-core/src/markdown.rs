@@ -106,12 +106,35 @@ pub fn format_markdown(path: &Path, check_only: bool, _config: Option<&Path>) ->
             }
 
             // Apply fixes using rumdl's fix coordinator
-            // TODO: Implement proper fix application
-            // For now, just indicate that fixes would be applied
-            Ok(true)
+            let coordinator = rumdl_lib::fix_coordinator::FixCoordinator::new();
+            let mut fixed_content = content.clone();
+
+            match coordinator.apply_fixes_iterative(
+                &rules,
+                &warnings,
+                &mut fixed_content,
+                &config,
+                100, // max iterations
+            ) {
+                Ok(_result) => {
+                    // Check if content actually changed
+                    let changed = fixed_content != content;
+
+                    if changed {
+                        // Write the fixed content back to the file
+                        std::fs::write(path, &fixed_content)?;
+                    }
+
+                    Ok(changed)
+                }
+                Err(e) => Err(crate::error::CoreError::ValidationFailed(format!(
+                    "Failed to apply markdown fixes: {}",
+                    e
+                ))),
+            }
         }
         Err(e) => Err(crate::error::CoreError::ValidationFailed(format!(
-            "Markdown formatting failed: {}",
+            "Markdown linting failed: {}",
             e
         ))),
     }
