@@ -1,0 +1,8 @@
+- name: Generate manpages
+  if: runner.os != 'Windows'
+  shell: bash
+  run: |
+    set -euo pipefail
+    out_dir="dist/share/man/man1"
+    mkdir -p "$out_dir"
+    cargo run --package xtask -- man --out-dir "$out_dir"
