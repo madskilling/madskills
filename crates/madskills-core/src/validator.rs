@@ -1,7 +1,7 @@
 //! AgentSkills specification validation
 
 use crate::models::{
-    Skill, ValidationError, ValidationErrorKind, ValidationResult, ALLOWED_FRONTMATTER_FIELDS,
+    ALLOWED_FRONTMATTER_FIELDS, Skill, ValidationError, ValidationErrorKind, ValidationResult,
 };
 use std::collections::{HashMap, HashSet};
 use unicode_normalization::UnicodeNormalization;
@@ -483,7 +483,10 @@ mod tests {
         let name2 = "cafe\u{0301}";
 
         // Both should normalize to the same thing
-        assert_eq!(name1.nfkc().collect::<String>(), name2.nfkc().collect::<String>());
+        assert_eq!(
+            name1.nfkc().collect::<String>(),
+            name2.nfkc().collect::<String>()
+        );
 
         let skill = make_skill(name1, "Test", name1);
         let result = validator.validate_skill(&skill);
