@@ -15,6 +15,8 @@ pub struct ValidationConfig {
     pub check_spec: bool,
     /// Enable markdown linting
     pub check_markdown: bool,
+    /// Path to mdlint config file
+    pub mdlint_config: Option<std::path::PathBuf>,
 }
 
 /// Validator for AgentSkills specification
@@ -34,6 +36,10 @@ impl Validator {
 
         if self.config.check_spec {
             self.validate_spec(skill, &mut result);
+        }
+
+        if self.config.check_markdown {
+            self.validate_markdown(skill, &mut result);
         }
 
         result
@@ -60,6 +66,39 @@ impl Validator {
 
         // Validate no extra fields
         self.validate_extra_fields(skill, &mut result.errors);
+    }
+
+    /// Perform markdown linting
+    fn validate_markdown(&self, skill: &Skill, result: &mut ValidationResult) {
+        // Lint the SKILL.md file
+        match crate::markdown::lint_markdown(
+            &skill.skill_md_path,
+            self.config.mdlint_config.as_deref(),
+        ) {
+            Ok(violations) => {
+                // Convert markdown violations to warnings (or errors if strict mode)
+                for v in violations {
+                    let warning = crate::models::ValidationWarning {
+                        kind: crate::models::ValidationWarningKind::MarkdownLintWarning,
+                        message: format!("[{}] {}", v.rule, v.message),
+                        location: Some(crate::models::SourceLocation {
+                            file: skill.skill_md_path.clone(),
+                            line: v.line,
+                            column: v.column,
+                        }),
+                    };
+                    result.warnings.push(warning);
+                }
+            }
+            Err(e) => {
+                // If markdown linting fails, add it as an error
+                result.errors.push(ValidationError {
+                    kind: ValidationErrorKind::MarkdownLintError,
+                    message: format!("Markdown linting failed: {}", e),
+                    location: None,
+                });
+            }
+        }
     }
 
     /// Validate the name field
@@ -310,6 +349,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            mdlint_config: None,
         });
 
         let skill = make_skill("test-skill", "A valid test skill", "test-skill");
@@ -323,6 +363,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            mdlint_config: None,
         });
 
         let long_name = "a".repeat(65);
@@ -343,6 +384,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            mdlint_config: None,
         });
 
         let skill = make_skill("TestSkill", "Test", "TestSkill");
@@ -362,6 +404,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            mdlint_config: None,
         });
 
         let skill = make_skill("test_skill", "Test", "test_skill");
@@ -381,6 +424,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            mdlint_config: None,
         });
 
         let skill = make_skill("test--skill", "Test", "test--skill");
@@ -400,6 +444,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            mdlint_config: None,
         });
 
         let skill = make_skill("test-skill", "Test", "wrong-dir");
@@ -419,6 +464,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            mdlint_config: None,
         });
 
         let skill = make_skill("test-skill", "", "test-skill");
@@ -461,6 +507,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            mdlint_config: None,
         });
 
         let skill = make_skill("café-skill", "A café skill", "café-skill");
@@ -475,6 +522,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            mdlint_config: None,
         });
 
         // café with composed é
@@ -501,6 +549,7 @@ mod tests {
             strict: false,
             check_spec: true,
             check_markdown: false,
+            mdlint_config: None,
         });
 
         let mut all_fields = HashSet::new();

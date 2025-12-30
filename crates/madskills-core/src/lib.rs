@@ -3,6 +3,7 @@
 
 pub mod discovery;
 pub mod error;
+pub mod markdown;
 pub mod models;
 pub mod output;
 pub mod parser;
