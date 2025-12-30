@@ -1,0 +1,25 @@
+[package]
+name = "madskills"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "CLI tool for validating and managing Agent Skills repositories"
+
+[[bin]]
+name = "madskills"
+path = "src/main.rs"
+
+[dependencies]
+madskills-core = { path = "../madskills-core" }
+madskills-rules = { path = "../madskills-rules" }
+clap = { version = "4.5", features = ["derive"] }
+anyhow = "1.0"
+atty = "0.2"
+serde_json = "1.0"
+
+[dev-dependencies]
+assert_cmd = "2.1"
+predicates = "3.1"
+tempfile = "3.23"

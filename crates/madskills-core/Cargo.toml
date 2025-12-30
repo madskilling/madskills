@@ -1,0 +1,19 @@
+[package]
+name = "madskills-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Core library for madskills - skill discovery, parsing, and validation"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
+serde_json = "1.0"
+thiserror = "2.0"
+ignore = "0.4"
+walkdir = "2.5"
+
+[dev-dependencies]
+tempfile = "3.23"
