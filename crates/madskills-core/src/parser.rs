@@ -2,17 +2,46 @@
 
 use crate::error::{CoreError, CoreResult};
 use crate::models::SkillMetadata;
+use std::collections::HashSet;
 use std::path::Path;
 
 /// Parse the frontmatter from a SKILL.md file content
 pub fn parse_frontmatter(content: &str, path: &Path) -> CoreResult<SkillMetadata> {
     let (yaml_str, _markdown) = extract_frontmatter(content, path)?;
 
-    // Parse YAML
-    serde_yaml::from_str(yaml_str).map_err(|source| CoreError::YamlParse {
-        path: path.to_path_buf(),
-        source,
-    })
+    // First, parse as generic Value to extract all field names
+    let value: serde_yaml::Value =
+        serde_yaml::from_str(yaml_str).map_err(|source| CoreError::YamlParse {
+            path: path.to_path_buf(),
+            source,
+        })?;
+
+    // Extract all top-level field names
+    let all_fields: HashSet<String> = if let serde_yaml::Value::Mapping(map) = &value {
+        map.keys()
+            .filter_map(|k| {
+                if let serde_yaml::Value::String(s) = k {
+                    Some(s.clone())
+                } else {
+                    None
+                }
+            })
+            .collect()
+    } else {
+        HashSet::new()
+    };
+
+    // Parse into SkillMetadata
+    let mut metadata: SkillMetadata =
+        serde_yaml::from_value(value).map_err(|source| CoreError::YamlParse {
+            path: path.to_path_buf(),
+            source,
+        })?;
+
+    // Set the all_fields
+    metadata.all_fields = all_fields;
+
+    Ok(metadata)
 }
 
 /// Extract frontmatter from content, returning (yaml_str, markdown_content)

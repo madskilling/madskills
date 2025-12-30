@@ -244,3 +244,40 @@ fn test_fmt_check_mode() {
     let content = fs::read_to_string(skill_dir.join("SKILL.md")).unwrap();
     assert!(content.starts_with("---\ndescription:"));
 }
+
+#[test]
+fn test_lint_unicode_skill_name() {
+    let temp = TempDir::new().unwrap();
+    let skill_dir = temp.path().join(".github/skills/café-skill");
+    fs::create_dir_all(&skill_dir).unwrap();
+
+    fs::write(
+        skill_dir.join("SKILL.md"),
+        "---\nname: café-skill\ndescription: Unicode test skill\n---\n# Test\n",
+    )
+    .unwrap();
+
+    let mut cmd = Command::cargo_bin("madskills").unwrap();
+    cmd.arg("lint").arg(temp.path()).assert().success();
+}
+
+#[test]
+fn test_lint_extra_fields() {
+    let temp = TempDir::new().unwrap();
+    let skill_dir = temp.path().join(".github/skills/test-skill");
+    fs::create_dir_all(&skill_dir).unwrap();
+
+    fs::write(
+        skill_dir.join("SKILL.md"),
+        "---\nname: test-skill\ndescription: Test\nunknown_field: bad\n---\n# Test\n",
+    )
+    .unwrap();
+
+    let mut cmd = Command::cargo_bin("madskills").unwrap();
+    cmd.arg("lint")
+        .arg(temp.path())
+        .assert()
+        .failure()
+        .code(2)
+        .stdout(predicate::str::contains("Unexpected fields"));
+}

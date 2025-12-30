@@ -1,7 +1,17 @@
 //! Core data models for Agent Skills
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
+
+/// Allowed frontmatter fields per AgentSkills spec
+pub const ALLOWED_FRONTMATTER_FIELDS: &[&str] = &[
+    "name",
+    "description",
+    "license",
+    "allowed-tools",
+    "metadata",
+    "compatibility",
+];
 
 /// Represents a discovered skill with its metadata and location
 #[derive(Debug, Clone)]
@@ -37,6 +47,9 @@ pub struct SkillMetadata {
     /// Optional: Custom metadata fields
     #[serde(default, skip_serializing_if = "HashMap::is_empty")]
     pub metadata: HashMap<String, String>,
+    /// Track all fields that were present in the frontmatter (for validation)
+    #[serde(skip)]
+    pub all_fields: HashSet<String>,
 }
 
 /// Configuration for skill discovery
