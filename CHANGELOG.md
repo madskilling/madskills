@@ -6,6 +6,30 @@ The format is based on *Keep a Changelog*, and this project adheres to *Semantic
 
 ## [Unreleased]
 
+### Added
+
+- **Phase 0**: AgentSkills spec validation compliance
+  - Unicode character support in skill names (not just ASCII)
+  - NFKC normalization for skill names and directory matching
+  - Extra fields validation (rejects unexpected frontmatter fields)
+  - Fixed optional field validation per spec (license, compatibility, allowed-tools)
+- **Phase 1**: Markdown linting integration (powered by rumdl library)
+  - `lint` command now validates both spec and markdown by default
+  - `--no-mdlint` flag to disable markdown linting in lint command
+  - `--no-spec` flag to disable spec validation in lint command
+  - `--mdlint-config` flag for custom markdown linting configuration
+  - Markdown violations reported as warnings (errors in `--strict` mode)
+- **Phase 2**: Markdown formatting integration
+  - `fmt` command now formats both frontmatter and markdown by default
+  - `--no-mdlint` flag to disable markdown formatting in fmt command
+  - `--no-frontmatter` flag to disable frontmatter normalization in fmt command
+  - `--mdlint-config` flag for custom markdown formatting configuration
+  - Sequential formatting: frontmatter normalization followed by markdown fixes
+
+### Changed
+
+- Renamed `--no-rumdl` flag to `--no-mdlint` for consistency
+
 ## [0.1.0] - 2025-12-30
 
 ### Added

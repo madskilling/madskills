@@ -5,8 +5,10 @@ CLI tool for validating and managing Agent Skills repositories.
 ## Features
 
 - **Spec validation**: Validates skills against the [AgentSkills specification](https://agentskills.io)
+- **Markdown linting**: Validates markdown style and formatting (powered by [rumdl](https://github.com/ericcornelissen/rumdl))
 - **Skill discovery**: Finds skills in `.github/skills/` and `.claude/skills/` (legacy)
 - **Frontmatter normalization**: Formats YAML frontmatter consistently
+- **Markdown formatting**: Auto-fixes markdown style issues
 - **Multiple output formats**: Human-readable text or machine-readable JSON
 - **CI-friendly**: Clear exit codes and strict mode for CI pipelines
 
@@ -43,8 +45,11 @@ madskills lint --strict
 # JSON output for CI
 madskills lint --format json
 
-# Spec validation only (no markdown linting)
+# Only spec validation (skip markdown linting)
 madskills lint --no-mdlint
+
+# Only markdown linting (skip spec validation)
+madskills lint --no-spec
 
 # Skip legacy .claude/skills
 madskills lint --no-legacy
@@ -88,19 +93,25 @@ madskills init my-skill --description "Process PDF documents"
 madskills init my-skill --dir path/to/custom/location
 ```
 
-### `madskills fmt` - Normalize skill files
+### `madskills fmt` - Format skill files
 
-Normalize YAML frontmatter formatting and key order.
+Formats both YAML frontmatter and markdown content.
 
 ```bash
-# Format all skills
+# Format all skills (frontmatter + markdown)
 madskills fmt
 
 # Check mode (don't write, exit 2 if changes needed)
 madskills fmt --check
 
-# Skip frontmatter normalization
+# Only frontmatter normalization (skip markdown)
+madskills fmt --no-mdlint
+
+# Only markdown formatting (skip frontmatter)
 madskills fmt --no-frontmatter
+
+# Custom markdown linting config
+madskills fmt --mdlint-config path/to/config.toml
 ```
 
 ## Global Options
@@ -194,8 +205,8 @@ just cov
 madskills/
 ├── crates/
 │   ├── madskills/        # CLI binary
-│   ├── madskills-core/   # Core library (discovery, parsing, validation)
-│   └── madskills-rules/  # Linting rules (future: rumdl integration)
+│   ├── madskills-core/   # Core library (discovery, parsing, validation, markdown)
+│   └── madskills-rules/  # Linting rules (extensible)
 ├── PLAN.md               # Implementation specification
 └── README.md
 ```
