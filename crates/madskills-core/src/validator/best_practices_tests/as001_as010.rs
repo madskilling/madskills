@@ -46,9 +46,11 @@ fn test_as001_xml_tags_in_name() {
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
 
-    assert!(violations.iter().any(|v| {
-        v.code == BestPracticeCode::AS001 && v.message.contains("XML tags")
-    }));
+    assert!(
+        violations
+            .iter()
+            .any(|v| { v.code == BestPracticeCode::AS001 && v.message.contains("XML tags") })
+    );
 }
 
 #[test]
@@ -57,9 +59,11 @@ fn test_as001_reserved_word_claude() {
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
 
-    assert!(violations.iter().any(|v| {
-        v.code == BestPracticeCode::AS001 && v.message.contains("reserved words")
-    }));
+    assert!(
+        violations
+            .iter()
+            .any(|v| { v.code == BestPracticeCode::AS001 && v.message.contains("reserved words") })
+    );
 }
 
 #[test]
@@ -68,9 +72,11 @@ fn test_as001_reserved_word_anthropic() {
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
 
-    assert!(violations.iter().any(|v| {
-        v.code == BestPracticeCode::AS001 && v.message.contains("reserved words")
-    }));
+    assert!(
+        violations
+            .iter()
+            .any(|v| { v.code == BestPracticeCode::AS001 && v.message.contains("reserved words") })
+    );
 }
 
 #[test]
@@ -90,9 +96,11 @@ fn test_as002_xml_tags_in_description() {
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
 
-    assert!(violations.iter().any(|v| {
-        v.code == BestPracticeCode::AS002 && v.message.contains("XML tags")
-    }));
+    assert!(
+        violations
+            .iter()
+            .any(|v| { v.code == BestPracticeCode::AS002 && v.message.contains("XML tags") })
+    );
 }
 
 #[test]
@@ -116,9 +124,11 @@ fn test_as003_first_person_i() {
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
 
-    assert!(violations.iter().any(|v| {
-        v.code == BestPracticeCode::AS003 && v.message.contains("third-person")
-    }));
+    assert!(
+        violations
+            .iter()
+            .any(|v| { v.code == BestPracticeCode::AS003 && v.message.contains("third-person") })
+    );
 }
 
 #[test]
@@ -127,9 +137,11 @@ fn test_as003_second_person_you() {
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
 
-    assert!(violations.iter().any(|v| {
-        v.code == BestPracticeCode::AS003 && v.message.contains("third-person")
-    }));
+    assert!(
+        violations
+            .iter()
+            .any(|v| { v.code == BestPracticeCode::AS003 && v.message.contains("third-person") })
+    );
 }
 
 #[test]
@@ -138,14 +150,20 @@ fn test_as003_first_person_plural_we() {
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
 
-    assert!(violations.iter().any(|v| {
-        v.code == BestPracticeCode::AS003 && v.message.contains("third-person")
-    }));
+    assert!(
+        violations
+            .iter()
+            .any(|v| { v.code == BestPracticeCode::AS003 && v.message.contains("third-person") })
+    );
 }
 
 #[test]
 fn test_as003_third_person_valid() {
-    let (_dir, skill) = setup_skill("test-skill", "Processes PDF files and extracts text", "Content");
+    let (_dir, skill) = setup_skill(
+        "test-skill",
+        "Processes PDF files and extracts text",
+        "Content",
+    );
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
 
@@ -167,7 +185,10 @@ fn test_as004_body_too_long() {
         .filter(|v| v.code == BestPracticeCode::AS004)
         .collect();
 
-    assert!(!as004_violations.is_empty(), "Expected AS004 violation for long body");
+    assert!(
+        !as004_violations.is_empty(),
+        "Expected AS004 violation for long body"
+    );
     assert!(as004_violations[0].message.contains("lines"));
     assert!(as004_violations[0].message.contains("500"));
 }
@@ -191,9 +212,11 @@ fn test_as005_backslashes_in_paths() {
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
 
-    assert!(violations.iter().any(|v| {
-        v.code == BestPracticeCode::AS005 && v.message.contains("forward slashes")
-    }));
+    assert!(
+        violations.iter().any(|v| {
+            v.code == BestPracticeCode::AS005 && v.message.contains("forward slashes")
+        })
+    );
 }
 
 #[test]
@@ -215,7 +238,8 @@ fn test_as006_nested_references() {
     fs::create_dir(&skill_path).unwrap();
 
     // SKILL.md references GUIDE.md
-    let skill_content = "---\nname: test-skill\ndescription: Test\n---\n\nSee [GUIDE.md](GUIDE.md) for details";
+    let skill_content =
+        "---\nname: test-skill\ndescription: Test\n---\n\nSee [GUIDE.md](GUIDE.md) for details";
     fs::write(skill_path.join("SKILL.md"), skill_content).unwrap();
 
     // GUIDE.md references DETAILS.md (nested!)
@@ -243,9 +267,11 @@ fn test_as006_nested_references() {
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
 
-    assert!(violations.iter().any(|v| {
-        v.code == BestPracticeCode::AS006 && v.message.contains("nested references")
-    }));
+    assert!(
+        violations.iter().any(|v| {
+            v.code == BestPracticeCode::AS006 && v.message.contains("nested references")
+        })
+    );
 }
 
 #[test]
@@ -294,7 +320,11 @@ fn test_as007_generic_doc_names() {
     let skill_path = dir.path().join("test-skill");
     fs::create_dir(&skill_path).unwrap();
 
-    fs::write(skill_path.join("SKILL.md"), "---\nname: test-skill\ndescription: Test\n---\n").unwrap();
+    fs::write(
+        skill_path.join("SKILL.md"),
+        "---\nname: test-skill\ndescription: Test\n---\n",
+    )
+    .unwrap();
     fs::write(skill_path.join("doc1.md"), "Content").unwrap();
 
     let mut all_fields = HashSet::new();
@@ -318,9 +348,11 @@ fn test_as007_generic_doc_names() {
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
 
-    assert!(violations.iter().any(|v| {
-        v.code == BestPracticeCode::AS007 && v.message.contains("doc1.md")
-    }));
+    assert!(
+        violations
+            .iter()
+            .any(|v| { v.code == BestPracticeCode::AS007 && v.message.contains("doc1.md") })
+    );
 }
 
 #[test]
@@ -329,7 +361,11 @@ fn test_as007_descriptive_names_valid() {
     let skill_path = dir.path().join("test-skill");
     fs::create_dir(&skill_path).unwrap();
 
-    fs::write(skill_path.join("SKILL.md"), "---\nname: test-skill\ndescription: Test\n---\n").unwrap();
+    fs::write(
+        skill_path.join("SKILL.md"),
+        "---\nname: test-skill\ndescription: Test\n---\n",
+    )
+    .unwrap();
     fs::write(skill_path.join("form_validation.md"), "Content").unwrap();
     fs::write(skill_path.join("api_reference.md"), "Content").unwrap();
 
@@ -365,7 +401,11 @@ fn test_as008_long_file_no_toc() {
     let skill_path = dir.path().join("test-skill");
     fs::create_dir(&skill_path).unwrap();
 
-    fs::write(skill_path.join("SKILL.md"), "---\nname: test-skill\ndescription: Test\n---\n").unwrap();
+    fs::write(
+        skill_path.join("SKILL.md"),
+        "---\nname: test-skill\ndescription: Test\n---\n",
+    )
+    .unwrap();
 
     // Create a long file without TOC
     let long_content = "# Reference\n\n".to_string() + &"Line\n".repeat(150);
@@ -392,9 +432,11 @@ fn test_as008_long_file_no_toc() {
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
 
-    assert!(violations.iter().any(|v| {
-        v.code == BestPracticeCode::AS008 && v.message.contains("table of contents")
-    }));
+    assert!(
+        violations.iter().any(|v| {
+            v.code == BestPracticeCode::AS008 && v.message.contains("table of contents")
+        })
+    );
 }
 
 #[test]
@@ -403,7 +445,11 @@ fn test_as008_long_file_with_toc() {
     let skill_path = dir.path().join("test-skill");
     fs::create_dir(&skill_path).unwrap();
 
-    fs::write(skill_path.join("SKILL.md"), "---\nname: test-skill\ndescription: Test\n---\n").unwrap();
+    fs::write(
+        skill_path.join("SKILL.md"),
+        "---\nname: test-skill\ndescription: Test\n---\n",
+    )
+    .unwrap();
 
     // Create a long file WITH TOC
     let content_with_toc = "# Reference\n\n## Table of Contents\n\n- [Section 1](#section-1)\n- [Section 2](#section-2)\n\n".to_string()
@@ -431,9 +477,7 @@ fn test_as008_long_file_with_toc() {
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
 
-    assert!(!violations
-        .iter()
-        .any(|v| v.code == BestPracticeCode::AS008));
+    assert!(!violations.iter().any(|v| v.code == BestPracticeCode::AS008));
 }
 
 // AS009: MCP tool format
@@ -469,9 +513,11 @@ fn test_as010_absolute_date_month_year() {
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
 
-    assert!(violations.iter().any(|v| {
-        v.code == BestPracticeCode::AS010 && v.message.contains("time-sensitive")
-    }));
+    assert!(
+        violations
+            .iter()
+            .any(|v| { v.code == BestPracticeCode::AS010 && v.message.contains("time-sensitive") })
+    );
 }
 
 #[test]
@@ -481,9 +527,11 @@ fn test_as010_absolute_date_quarter() {
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
 
-    assert!(violations.iter().any(|v| {
-        v.code == BestPracticeCode::AS010 && v.message.contains("time-sensitive")
-    }));
+    assert!(
+        violations
+            .iter()
+            .any(|v| { v.code == BestPracticeCode::AS010 && v.message.contains("time-sensitive") })
+    );
 }
 
 #[test]
@@ -521,9 +569,11 @@ fn test_severity_warning_mode() {
         .collect();
 
     assert!(!as001_violations.is_empty());
-    assert!(as001_violations
-        .iter()
-        .all(|v| v.severity == Severity::Warning));
+    assert!(
+        as001_violations
+            .iter()
+            .all(|v| v.severity == Severity::Warning)
+    );
 }
 
 #[test]
@@ -538,7 +588,9 @@ fn test_severity_error_mode() {
         .collect();
 
     assert!(!as001_violations.is_empty());
-    assert!(as001_violations
-        .iter()
-        .all(|v| v.severity == Severity::Error));
+    assert!(
+        as001_violations
+            .iter()
+            .all(|v| v.severity == Severity::Error)
+    );
 }

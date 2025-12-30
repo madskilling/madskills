@@ -42,7 +42,10 @@ impl OutputFormatter {
         let mut total_bp_violations = 0;
 
         for result in results {
-            if result.errors.is_empty() && result.warnings.is_empty() && result.best_practice_violations.is_empty() {
+            if result.errors.is_empty()
+                && result.warnings.is_empty()
+                && result.best_practice_violations.is_empty()
+            {
                 continue;
             }
 
@@ -69,7 +72,8 @@ impl OutputFormatter {
                 };
 
                 let location = self.format_violation_location(&violation.location);
-                output.push_str(&format!("  {} [{}]{} {}\n",
+                output.push_str(&format!(
+                    "  {} [{}]{} {}\n",
                     icon,
                     violation.code.as_str(),
                     location,
@@ -101,7 +105,10 @@ impl OutputFormatter {
     }
 
     /// Format violation location for display
-    fn format_violation_location(&self, location: &Option<crate::models::ViolationLocation>) -> String {
+    fn format_violation_location(
+        &self,
+        location: &Option<crate::models::ViolationLocation>,
+    ) -> String {
         use crate::models::ViolationLocation;
 
         match location {

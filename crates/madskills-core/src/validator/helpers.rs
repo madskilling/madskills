@@ -9,14 +9,6 @@ pub fn contains_xml_tags(text: &str) -> bool {
     re.is_match(text)
 }
 
-/// Extract file references from content (e.g., @path/to/file.txt)
-pub fn extract_file_references(content: &str) -> Vec<String> {
-    let re = Regex::new(r"@([a-zA-Z0-9_/-]+\.[a-z]+)").unwrap();
-    re.captures_iter(content)
-        .map(|cap| cap[1].to_string())
-        .collect()
-}
-
 /// List all files in a skill directory (non-recursive)
 pub fn list_skill_files(skill_path: &Path) -> Vec<PathBuf> {
     std::fs::read_dir(skill_path)
@@ -98,7 +90,9 @@ mod tests {
         assert!(contains_first_or_second_person("I will help"));
         assert!(contains_first_or_second_person("You should do this"));
         assert!(contains_first_or_second_person("We recommend"));
-        assert!(!contains_first_or_second_person("The skill processes files"));
+        assert!(!contains_first_or_second_person(
+            "The skill processes files"
+        ));
     }
 
     #[test]

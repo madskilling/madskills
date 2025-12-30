@@ -59,7 +59,10 @@ fn test_as011_output_skill_with_template() {
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as011_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS011).collect();
+    let as011_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS011)
+        .collect();
     assert_eq!(as011_violations.len(), 0);
 }
 
@@ -74,7 +77,10 @@ fn test_as011_output_skill_missing_template() {
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as011_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS011).collect();
+    let as011_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS011)
+        .collect();
     assert_eq!(as011_violations.len(), 1);
 }
 
@@ -89,7 +95,10 @@ fn test_as011_non_output_skill() {
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as011_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS011).collect();
+    let as011_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS011)
+        .collect();
     assert_eq!(as011_violations.len(), 0);
 }
 
@@ -107,7 +116,7 @@ fn test_as012_mixed_terminology() {
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
     // Should detect user/customer and delete/remove mixing
-    assert!(violations.len() >= 1);
+    assert!(!violations.is_empty());
     assert!(violations.iter().any(|v| v.code == BestPracticeCode::AS012));
 }
 
@@ -122,7 +131,10 @@ fn test_as012_consistent_terminology() {
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as012_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS012).collect();
+    let as012_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS012)
+        .collect();
     assert_eq!(as012_violations.len(), 0);
 }
 
@@ -139,7 +151,10 @@ fn test_as013_script_with_dependencies_section() {
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as013_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS013).collect();
+    let as013_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS013)
+        .collect();
     assert_eq!(as013_violations.len(), 0);
 }
 
@@ -154,7 +169,10 @@ fn test_as013_script_without_dependencies_section() {
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as013_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS013).collect();
+    let as013_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS013)
+        .collect();
     assert_eq!(as013_violations.len(), 1);
 }
 
@@ -169,7 +187,10 @@ fn test_as013_no_scripts() {
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as013_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS013).collect();
+    let as013_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS013)
+        .collect();
     assert_eq!(as013_violations.len(), 0);
 }
 
@@ -186,7 +207,10 @@ fn test_as014_has_usage_trigger() {
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as014_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS014).collect();
+    let as014_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS014)
+        .collect();
     assert_eq!(as014_violations.len(), 0);
 }
 
@@ -201,7 +225,10 @@ fn test_as014_missing_usage_trigger() {
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as014_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS014).collect();
+    let as014_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS014)
+        .collect();
     assert_eq!(as014_violations.len(), 1);
 }
 
@@ -218,22 +245,24 @@ fn test_as015_gerund_naming() {
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as015_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS015).collect();
+    let as015_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS015)
+        .collect();
     assert_eq!(as015_violations.len(), 0);
 }
 
 #[test]
 fn test_as015_imperative_naming() {
-    let (_dir, skill) = setup_skill_with_files(
-        "process-pdfs",
-        "Test description",
-        "Body content",
-        vec![],
-    );
+    let (_dir, skill) =
+        setup_skill_with_files("process-pdfs", "Test description", "Body content", vec![]);
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as015_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS015).collect();
+    let as015_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS015)
+        .collect();
     assert_eq!(as015_violations.len(), 1);
     assert!(as015_violations[0].message.contains("gerund"));
 }
@@ -242,17 +271,16 @@ fn test_as015_imperative_naming() {
 
 #[test]
 fn test_as016_contains_claude() {
-    let (_dir, skill) = setup_skill_with_files(
-        "claude-helper",
-        "Test description",
-        "Body content",
-        vec![],
-    );
+    let (_dir, skill) =
+        setup_skill_with_files("claude-helper", "Test description", "Body content", vec![]);
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as016_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS016).collect();
-    assert!(as016_violations.len() >= 1);
+    let as016_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS016)
+        .collect();
+    assert!(!as016_violations.is_empty());
 }
 
 #[test]
@@ -266,8 +294,11 @@ fn test_as016_contains_anthropic() {
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as016_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS016).collect();
-    assert!(as016_violations.len() >= 1);
+    let as016_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS016)
+        .collect();
+    assert!(!as016_violations.is_empty());
 }
 
 #[test]
@@ -281,7 +312,10 @@ fn test_as016_no_reserved_words() {
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as016_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS016).collect();
+    let as016_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS016)
+        .collect();
     assert_eq!(as016_violations.len(), 0);
 }
 
@@ -308,7 +342,10 @@ except Exception as e:
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as017_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS017).collect();
+    let as017_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS017)
+        .collect();
     assert_eq!(as017_violations.len(), 0);
 }
 
@@ -328,7 +365,10 @@ print(result)
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as017_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS017).collect();
+    let as017_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS017)
+        .collect();
     assert_eq!(as017_violations.len(), 1);
 }
 
@@ -352,7 +392,10 @@ fi
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as017_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS017).collect();
+    let as017_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS017)
+        .collect();
     assert_eq!(as017_violations.len(), 0);
 }
 
@@ -374,7 +417,10 @@ TIMEOUT = 30
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as018_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS018).collect();
+    let as018_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS018)
+        .collect();
     assert_eq!(as018_violations.len(), 0);
 }
 
@@ -394,7 +440,7 @@ MAX_RETRIES = 5
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    assert!(violations.len() >= 1);
+    assert!(!violations.is_empty());
     assert!(violations.iter().any(|v| v.code == BestPracticeCode::AS018));
 }
 
@@ -411,7 +457,10 @@ fn test_as019_workflow_with_numbered_steps() {
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as019_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS019).collect();
+    let as019_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS019)
+        .collect();
     assert_eq!(as019_violations.len(), 0);
 }
 
@@ -426,7 +475,10 @@ fn test_as019_workflow_with_checkboxes() {
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as019_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS019).collect();
+    let as019_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS019)
+        .collect();
     assert_eq!(as019_violations.len(), 0);
 }
 
@@ -441,7 +493,10 @@ fn test_as019_workflow_without_structure() {
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as019_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS019).collect();
+    let as019_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS019)
+        .collect();
     assert_eq!(as019_violations.len(), 1);
 }
 
@@ -466,7 +521,10 @@ More content."#;
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as020_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS020).collect();
+    let as020_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS020)
+        .collect();
     assert_eq!(as020_violations.len(), 0);
 }
 
@@ -488,22 +546,24 @@ More content not in TOC!"#;
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as020_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS020).collect();
+    let as020_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS020)
+        .collect();
     assert_eq!(as020_violations.len(), 1);
 }
 
 #[test]
 fn test_as020_no_toc() {
-    let (_dir, skill) = setup_skill_with_files(
-        "test-skill",
-        "Test",
-        "## Introduction\n\n## Usage",
-        vec![],
-    );
+    let (_dir, skill) =
+        setup_skill_with_files("test-skill", "Test", "## Introduction\n\n## Usage", vec![]);
 
     let validator = BestPracticesValidator::new(false);
     let violations = validator.validate(&skill);
-    let as020_violations: Vec<_> = violations.iter().filter(|v| v.code == BestPracticeCode::AS020).collect();
+    let as020_violations: Vec<_> = violations
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS020)
+        .collect();
     assert_eq!(as020_violations.len(), 0); // No TOC means no violation
 }
 
@@ -518,13 +578,19 @@ fn test_strict_mode_severity_as011_as020() {
 
     let validator_warning = BestPracticesValidator::new(false);
     let violations_warning = validator_warning.validate(&skill);
-    let as011_warnings: Vec<_> = violations_warning.iter().filter(|v| v.code == BestPracticeCode::AS011).collect();
+    let as011_warnings: Vec<_> = violations_warning
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS011)
+        .collect();
     assert!(!as011_warnings.is_empty());
     assert_eq!(as011_warnings[0].severity, Severity::Warning);
 
     let validator_error = BestPracticesValidator::new(true);
     let violations_error = validator_error.validate(&skill);
-    let as011_errors: Vec<_> = violations_error.iter().filter(|v| v.code == BestPracticeCode::AS011).collect();
+    let as011_errors: Vec<_> = violations_error
+        .iter()
+        .filter(|v| v.code == BestPracticeCode::AS011)
+        .collect();
     assert!(!as011_errors.is_empty());
     assert_eq!(as011_errors[0].severity, Severity::Error);
 }

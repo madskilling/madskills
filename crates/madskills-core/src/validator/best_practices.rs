@@ -166,20 +166,21 @@ impl BestPracticesValidator {
 
         // Check SKILL.md for backslashes
         if let Ok(content) = std::fs::read_to_string(&skill.skill_md_path)
-            && contains_backslashes(&content) {
-                // More detailed check: look for path-like backslashes (not escape sequences)
-                let re = Regex::new(r"[a-zA-Z0-9_-]+\\[a-zA-Z0-9_-]").unwrap();
-                if re.is_match(&content) {
-                    violations.push(self.violation(
-                        BestPracticeCode::AS005,
-                        "Use forward slashes (/) in file paths, not backslashes (\\)",
-                        Some(ViolationLocation::File {
-                            path: skill.skill_md_path.clone(),
-                            line: None,
-                        }),
-                    ));
-                }
+            && contains_backslashes(&content)
+        {
+            // More detailed check: look for path-like backslashes (not escape sequences)
+            let re = Regex::new(r"[a-zA-Z0-9_-]+\\[a-zA-Z0-9_-]").unwrap();
+            if re.is_match(&content) {
+                violations.push(self.violation(
+                    BestPracticeCode::AS005,
+                    "Use forward slashes (/) in file paths, not backslashes (\\)",
+                    Some(ViolationLocation::File {
+                        path: skill.skill_md_path.clone(),
+                        line: None,
+                    }),
+                ));
             }
+        }
 
         violations
     }
@@ -196,10 +197,11 @@ impl BestPracticesValidator {
             for ref_file in referenced_files {
                 let ref_path = skill.root.join(&ref_file);
                 if ref_path.exists()
-                    && let Ok(ref_content) = std::fs::read_to_string(&ref_path) {
-                        let nested_refs = Self::extract_markdown_links(&ref_content);
-                        if !nested_refs.is_empty() {
-                            violations.push(self.violation(
+                    && let Ok(ref_content) = std::fs::read_to_string(&ref_path)
+                {
+                    let nested_refs = Self::extract_markdown_links(&ref_content);
+                    if !nested_refs.is_empty() {
+                        violations.push(self.violation(
                                 BestPracticeCode::AS006,
                                 format!(
                                     "File {} contains nested references (references should be one level deep from SKILL.md)",
@@ -210,8 +212,8 @@ impl BestPracticesValidator {
                                     line: None,
                                 }),
                             ));
-                        }
                     }
+                }
             }
         }
 
@@ -324,7 +326,10 @@ impl BestPracticesValidator {
                     let context_end = (cap.get(0).unwrap().end() + 100).min(content.len());
                     let context = &content[context_start..context_end].to_lowercase();
 
-                    if context.contains("mcp") || context.contains("server") || context.contains("tool") {
+                    if context.contains("mcp")
+                        || context.contains("server")
+                        || context.contains("tool")
+                    {
                         violations.push(self.violation(
                             BestPracticeCode::AS009,
                             format!(
@@ -394,9 +399,7 @@ impl BestPracticesValidator {
                 "generate", "create", "write", "produce", "output", "format", "export",
             ];
 
-            let is_output_skill = output_keywords
-                .iter()
-                .any(|kw| desc_lower.contains(kw));
+            let is_output_skill = output_keywords.iter().any(|kw| desc_lower.contains(kw));
 
             if is_output_skill {
                 // Check for template/example patterns
@@ -528,13 +531,19 @@ impl BestPracticesValidator {
         if !gerund_pattern.is_match(name) {
             // Check if it's an imperative verb form
             let imperative_verbs = [
-                "analyze", "process", "generate", "create", "validate", "parse", "extract",
-                "format", "convert", "transform",
+                "analyze",
+                "process",
+                "generate",
+                "create",
+                "validate",
+                "parse",
+                "extract",
+                "format",
+                "convert",
+                "transform",
             ];
 
-            let has_imperative = imperative_verbs
-                .iter()
-                .any(|verb| name.starts_with(verb));
+            let has_imperative = imperative_verbs.iter().any(|verb| name.starts_with(verb));
 
             if has_imperative {
                 violations.push(self.violation(
@@ -555,7 +564,10 @@ impl BestPracticesValidator {
     }
 
     /// AS016: Avoid reserved words in name
-    fn check_as016_no_reserved_words(&self, metadata: &SkillMetadata) -> Vec<BestPracticeViolation> {
+    fn check_as016_no_reserved_words(
+        &self,
+        metadata: &SkillMetadata,
+    ) -> Vec<BestPracticeViolation> {
         let mut violations = Vec::new();
 
         let name_lower = metadata.name.to_lowercase();
@@ -637,13 +649,13 @@ impl BestPracticesValidator {
                 // Look for numeric assignments without nearby comments
                 let patterns = match ext {
                     "py" => vec![
-                        r"^\s*[A-Z_]+\s*=\s*\d+\s*$",           // CONSTANT = 42
-                        r"timeout\s*=\s*\d+",                   // timeout = 30
-                        r"max_.*\s*=\s*\d+",                    // max_retries = 5
+                        r"^\s*[A-Z_]+\s*=\s*\d+\s*$", // CONSTANT = 42
+                        r"timeout\s*=\s*\d+",         // timeout = 30
+                        r"max_.*\s*=\s*\d+",          // max_retries = 5
                     ],
                     "js" | "ts" => vec![
-                        r"^\s*const\s+[A-Z_]+\s*=\s*\d+\s*;",  // const MAX = 42;
-                        r"timeout:\s*\d+",                      // timeout: 30
+                        r"^\s*const\s+[A-Z_]+\s*=\s*\d+\s*;", // const MAX = 42;
+                        r"timeout:\s*\d+",                    // timeout: 30
                     ],
                     _ => vec![],
                 };
@@ -699,9 +711,7 @@ impl BestPracticesValidator {
                 "multi-step",
             ];
 
-            let has_workflow_section = workflow_indicators
-                .iter()
-                .any(|ind| content.contains(ind));
+            let has_workflow_section = workflow_indicators.iter().any(|ind| content.contains(ind));
 
             if has_workflow_section {
                 // Check for numbered lists or checkboxes

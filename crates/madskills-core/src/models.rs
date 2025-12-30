@@ -185,10 +185,26 @@ impl ValidationResult {
 /// Best practice rule codes (AS001-AS020)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum BestPracticeCode {
-    AS001, AS002, AS003, AS004, AS005,
-    AS006, AS007, AS008, AS009, AS010,
-    AS011, AS012, AS013, AS014, AS015,
-    AS016, AS017, AS018, AS019, AS020,
+    AS001,
+    AS002,
+    AS003,
+    AS004,
+    AS005,
+    AS006,
+    AS007,
+    AS008,
+    AS009,
+    AS010,
+    AS011,
+    AS012,
+    AS013,
+    AS014,
+    AS015,
+    AS016,
+    AS017,
+    AS018,
+    AS019,
+    AS020,
 }
 
 impl BestPracticeCode {
