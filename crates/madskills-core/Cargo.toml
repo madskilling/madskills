@@ -6,6 +6,9 @@ rust-version.workspace = true
 license.workspace = true
 authors.workspace = true
 description = "Core library for madskills - skill discovery, parsing, and validation"
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
@@ -15,7 +18,9 @@ thiserror = "2.0"
 ignore = "0.4"
 walkdir = "2.5"
 unicode-normalization = "0.1"
-rumdl = { version = "0.0.206", default-features = false, features = ["parallel"] }
+rumdl = { version = "0.0.206", default-features = false, features = [
+  "parallel",
+] }
 regex = "1.10"
 
 [dev-dependencies]
