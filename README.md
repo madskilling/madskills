@@ -6,7 +6,7 @@ CLI tool for validating and managing Agent Skills repositories.
 
 - **Spec validation**: Validates skills against the [AgentSkills specification](https://agentskills.io)
 - **Markdown linting**: Validates markdown style and formatting (powered by [rumdl](https://github.com/ericcornelissen/rumdl))
-- **Skill discovery**: Finds skills in `.github/skills/` and `.claude/skills/` (legacy)
+- **Smart skill discovery**: Automatically detects skills using environment variables, AGENTS.md, or well-known directories
 - **Frontmatter normalization**: Formats YAML frontmatter consistently
 - **Markdown formatting**: Auto-fixes markdown style issues
 - **Multiple output formats**: Human-readable text or machine-readable JSON
@@ -62,9 +62,6 @@ madskills lint --no-mdlint
 
 # Only markdown linting (skip spec validation)
 madskills lint --no-spec
-
-# Skip legacy .claude/skills
-madskills lint --no-legacy
 ```
 
 **Exit codes:**
@@ -89,19 +86,16 @@ madskills list --format json
 
 ### `madskills init` - Scaffold a new skill
 
-Create a new skill directory with template files.
+Create a new skill directory with template files. Auto-detects the appropriate location (see Skill Discovery below).
 
 ```bash
-# Create skill in .github/skills/
+# Create skill (auto-detects location)
 madskills init my-skill
-
-# Create in .claude/skills/ (legacy)
-madskills init my-skill --legacy
 
 # Custom description
 madskills init my-skill --description "Process PDF documents"
 
-# Custom location
+# Override auto-detection with explicit location
 madskills init my-skill --dir path/to/custom/location
 ```
 
@@ -135,6 +129,33 @@ madskills fmt --mdlint-config path/to/config.toml
     --color <WHEN>   Colorize output: auto|always|never
 ```
 
+## Skill Discovery
+
+madskills automatically detects where skills are located using a priority-based algorithm:
+
+1. **`AGENT_SKILLS_DIR` environment variable** - If set and exists, uses this directory
+2. **AGENTS.md file** - Searches for `/skills` pattern in AGENTS.md (e.g., `.claude/skills/`, `~/agent-skills/`)
+3. **Well-known directories** (first found):
+   - `.github/skills/`
+   - `.claude/skills/`
+   - `.codex/skills/`
+4. **Fallback logic**:
+   - If `.github/` exists → `.github/skills/`
+   - Otherwise → `./skills/`
+
+**Override detection:**
+
+```bash
+# Set environment variable for all commands
+export AGENT_SKILLS_DIR=~/my-skills
+madskills lint
+
+# Use --dir flag for init command
+madskills init my-skill --dir custom/path/my-skill
+```
+
+**Note:** Home directory (`~`) expansion is supported in AGENTS.md and `AGENT_SKILLS_DIR`.
+
 ## AgentSkills Specification Checks
 
 The `lint` command validates:
@@ -156,8 +177,7 @@ The `lint` command validates:
 
 ### Cross-Skill Validation
 
-- Skill names must be unique across the workspace
-- No duplicate names in `.github/skills/` and `.claude/skills/`
+- Skill names must be unique across the detected skills directory
 
 ## Examples
 

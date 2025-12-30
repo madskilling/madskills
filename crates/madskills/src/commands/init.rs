@@ -18,10 +18,6 @@ pub struct InitArgs {
     #[arg(long)]
     pub dir: Option<PathBuf>,
 
-    /// Create under .claude/skills instead of .github/skills
-    #[arg(long)]
-    pub legacy: bool,
-
     /// Frontmatter description (optional; else placeholder)
     #[arg(long)]
     pub description: Option<String>,
@@ -38,10 +34,9 @@ pub fn cmd_init(args: InitArgs, quiet: bool) -> Result<()> {
     // Determine target directory
     let target_dir = if let Some(dir) = args.dir {
         dir
-    } else if args.legacy {
-        args.root.join(".claude/skills").join(&args.name)
     } else {
-        args.root.join(".github/skills").join(&args.name)
+        let skills_base = madskills_core::discovery::detect_skills_directory(&args.root)?;
+        skills_base.join(&args.name)
     };
 
     // Check if directory exists

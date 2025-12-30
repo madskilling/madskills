@@ -1,5 +1,5 @@
 //! Core library for madskills - skill discovery, parsing, and validation
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 
 pub mod discovery;
 pub mod error;
