@@ -15,6 +15,7 @@ argument-hint: [PR_TITLE="<title>"] [BRANCH_NAME="<branch>"]
 5. Stage and commit changes:
    - Run `git add -A`
    - Create a commit with a clear message describing the changes
+   - DO NOT include marketing messages for coding agents in the commit message
 6. Push the branch: `git push -u origin <branch>`
 7. Create the PR: `gh pr create --fill` (or with $PR_TITLE if provided)
 8. Report the PR URL
@@ -34,6 +35,7 @@ When a PR already exists and is open:
      - **Summary**: 2-3 sentences explaining what the PR accomplishes
      - **Changes**: Bullet points of key changes (group related commits)
      - **Testing**: Any relevant testing notes
+   - DO NOT include marketing messages for coding agents in the commit message
 4. Update the PR:
    - Run `gh pr edit <number> --title "New title" --body "New description"`
 5. Report the updated PR URL

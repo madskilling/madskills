@@ -15,6 +15,7 @@ thiserror = "2.0"
 ignore = "0.4"
 walkdir = "2.5"
 unicode-normalization = "0.1"
+rumdl = { version = "0.0.206", default-features = false, features = ["parallel"] }
 
 [dev-dependencies]
 tempfile = "3.23"

@@ -36,6 +36,10 @@ pub struct LintArgs {
     #[arg(long)]
     pub no_spec: bool,
 
+    /// Markdown lint config file
+    #[arg(long)]
+    pub mdlint_config: Option<PathBuf>,
+
     /// Additional SKILL.md glob(s) to include (repeatable)
     #[arg(long)]
     pub include: Vec<String>,
@@ -78,6 +82,7 @@ pub fn cmd_lint(args: LintArgs, quiet: bool) -> Result<()> {
         strict: args.strict,
         check_spec: !args.no_spec,
         check_markdown: !args.no_mdlint,
+        mdlint_config: args.mdlint_config,
     });
 
     let mut results = Vec::new();
