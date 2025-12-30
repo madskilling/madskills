@@ -1,0 +1,191 @@
+//! Normalize skill files command
+
+use anyhow::{Context, Result};
+use clap::Args;
+use madskills_core::{DiscoveryConfig, discovery::discover_skills};
+use std::path::PathBuf;
+
+#[derive(Args)]
+pub struct FmtArgs {
+    /// Root to scan
+    #[arg(default_value = ".")]
+    pub path: PathBuf,
+
+    /// Do not write; exit nonzero if changes needed
+    #[arg(long)]
+    pub check: bool,
+
+    /// Output format
+    #[arg(long, value_enum, default_value = "text")]
+    pub format: Format,
+
+    /// Do not scan .claude/skills
+    #[arg(long)]
+    pub no_legacy: bool,
+
+    /// Additional SKILL.md glob(s) to include (repeatable)
+    #[arg(long)]
+    pub include: Vec<String>,
+
+    /// Path glob(s) to exclude (repeatable)
+    #[arg(long)]
+    pub exclude: Vec<String>,
+
+    /// Do not apply rumdl-based fixes
+    #[arg(long)]
+    pub no_rumdl: bool,
+
+    /// Do not rewrite YAML frontmatter
+    #[arg(long)]
+    pub no_frontmatter: bool,
+}
+
+#[derive(clap::ValueEnum, Clone, Copy)]
+pub enum Format {
+    Text,
+    Json,
+}
+
+pub fn cmd_fmt(args: FmtArgs, quiet: bool) -> Result<()> {
+    // Discover skills
+    let config = DiscoveryConfig {
+        root_path: args.path,
+        include_legacy: !args.no_legacy,
+        include_patterns: args.include,
+        exclude_patterns: args.exclude,
+    };
+
+    let skills = discover_skills(&config).context("Failed to discover skills")?;
+
+    if skills.is_empty() {
+        if !quiet {
+            eprintln!("No skills found");
+        }
+        return Ok(());
+    }
+
+    let mut changes_needed = false;
+    let mut formatted_count = 0;
+
+    for skill in &skills {
+        // Read SKILL.md
+        let content = std::fs::read_to_string(&skill.skill_md_path)
+            .with_context(|| format!("Failed to read {}", skill.skill_md_path.display()))?;
+
+        // For now, we just normalize the frontmatter format
+        // Future: integrate with rumdl for markdown formatting
+        let formatted_content = if !args.no_frontmatter {
+            normalize_frontmatter(&content, &skill.skill_md_path)?
+        } else {
+            content.clone()
+        };
+
+        // Check if changes are needed
+        if formatted_content != content {
+            changes_needed = true;
+            formatted_count += 1;
+
+            if !args.check {
+                // Write formatted content
+                std::fs::write(&skill.skill_md_path, &formatted_content).with_context(|| {
+                    format!("Failed to write {}", skill.skill_md_path.display())
+                })?;
+
+                if !quiet {
+                    println!("Formatted: {}", skill.skill_md_path.display());
+                }
+            } else if !quiet {
+                println!("Would format: {}", skill.skill_md_path.display());
+            }
+        }
+    }
+
+    if args.check && changes_needed {
+        if !quiet {
+            eprintln!("{} file(s) would be formatted", formatted_count);
+        }
+        std::process::exit(2);
+    } else if !quiet && !args.check {
+        println!("Formatted {} file(s)", formatted_count);
+    }
+
+    Ok(())
+}
+
+/// Normalize frontmatter formatting
+fn normalize_frontmatter(content: &str, path: &std::path::Path) -> Result<String> {
+    // Simple normalization: ensure consistent YAML formatting
+    // Parse frontmatter, re-serialize it in canonical form
+
+    use madskills_core::parser::parse_frontmatter;
+
+    let metadata = parse_frontmatter(content, path)?;
+
+    // Rebuild frontmatter
+    let mut frontmatter = String::from("---\n");
+    frontmatter.push_str(&format!("name: {}\n", metadata.name));
+    frontmatter.push_str(&format!("description: {}\n", metadata.description));
+
+    if let Some(ref license) = metadata.license {
+        frontmatter.push_str(&format!("license: {}\n", license));
+    }
+
+    if let Some(ref compat) = metadata.compatibility {
+        frontmatter.push_str(&format!("compatibility: {}\n", compat));
+    }
+
+    if let Some(ref tools) = metadata.allowed_tools {
+        frontmatter.push_str(&format!("allowed-tools: {}\n", tools));
+    }
+
+    if !metadata.metadata.is_empty() {
+        frontmatter.push_str("metadata:\n");
+        let mut keys: Vec<_> = metadata.metadata.keys().collect();
+        keys.sort();
+        for key in keys {
+            if let Some(value) = metadata.metadata.get(key) {
+                frontmatter.push_str(&format!("  {}: {}\n", key, value));
+            }
+        }
+    }
+
+    frontmatter.push_str("---\n");
+
+    // Extract markdown content (everything after closing ---)
+    let markdown_start = content
+        .find("\n---\n")
+        .or_else(|| content.find("\n---\r\n"))
+        .map(|idx| {
+            if content[idx..].starts_with("\n---\r\n") {
+                idx + 6
+            } else {
+                idx + 5
+            }
+        })
+        .unwrap_or(content.len());
+
+    let markdown = &content[markdown_start..];
+
+    Ok(frontmatter + markdown)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    #[test]
+    fn test_normalize_frontmatter() {
+        let content = r#"---
+description: Test skill
+name: test-skill
+---
+# Content
+"#;
+        let path = PathBuf::from("test.md");
+        let normalized = normalize_frontmatter(content, &path).unwrap();
+
+        // Should reorder fields: name first, then description
+        assert!(normalized.contains("name: test-skill\ndescription: Test skill\n"));
+    }
+}

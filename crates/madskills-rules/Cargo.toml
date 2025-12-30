@@ -1,0 +1,13 @@
+[package]
+name = "madskills-rules"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Linting rules for madskills - AgentSkills spec rules and markdown linting"
+
+[dependencies]
+madskills-core = { path = "../madskills-core" }
+# rumdl = "0.0.206"  # To be added when integrating markdown linting
+thiserror = "2.0"
