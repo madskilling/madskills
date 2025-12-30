@@ -357,4 +357,4 @@ rust-project.json
 # End of https://www.toptal.com/developers/gitignore/api/direnv,macos,node,rust,rust-analyzer,visualstudiocode,phpunit,php-cs-fixer,phpstorm
 
 PLAN.md
-.handoff/
+.handoffs/
