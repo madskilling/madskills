@@ -9,7 +9,7 @@ version = "0.1.0"
 rust-version = "1.91.0"
 readme = "README.md"
 authors = ["Clay Loveless <clay@loveless.net>"]
-description = ""
+description = "Got a skill issue? madskills fixes it -- the toolchain for madskilling: lint, fmt, and wrangle Agent Skills like you mean it."
 keywords = []
 categories = []
 
@@ -34,7 +34,15 @@ targets = [
   "x86_64-pc-windows-msvc",
   "aarch64-apple-darwin",
 ]
-tap = "claylo/homebrew-brew"
+tap = "madskilling/homebrew-brew"
 publish-jobs = ["homebrew"]
 # if yaml format issues continue to be a problem, turn this on
 # allow-dirty = ["ci"]
+pr-run-mode = "upload"
+github-release = "auto"
+cargo-auditable = true
+
+[workspace.metadata.dist.github-action-commits]
+"actions/checkout" = "v6"
+"actions/upload-artifact" = "v6"
+"actions/download-artifact" = "v7"

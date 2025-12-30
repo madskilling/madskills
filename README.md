@@ -14,6 +14,18 @@ CLI tool for validating and managing Agent Skills repositories.
 
 ## Installation
 
+### Homebrew (macOS and Linux)
+
+```bash
+brew install madskilling/brew/madskills
+```
+
+### Pre-built Binaries
+
+Download the latest release for your platform from the [releases page](https://github.com/madskilling/madskills/releases).
+
+### From Source
+
 ```bash
 cargo install madskills
 ```
@@ -21,9 +33,9 @@ cargo install madskills
 Or build from source:
 
 ```bash
-git clone https://github.com/claylo/madskills
+git clone https://github.com/madskilling/madskills.git
 cd madskills
-cargo build --release
+cargo install --path crates/madskills
 ```
 
 ## Commands
