@@ -1,7 +1,10 @@
 //! AgentSkills specification validation
 
-use crate::models::{Skill, ValidationError, ValidationErrorKind, ValidationResult};
-use std::collections::HashMap;
+use crate::models::{
+    Skill, ValidationError, ValidationErrorKind, ValidationResult, ALLOWED_FRONTMATTER_FIELDS,
+};
+use std::collections::{HashMap, HashSet};
+use unicode_normalization::UnicodeNormalization;
 
 /// Validator configuration
 #[derive(Debug, Clone)]
@@ -48,6 +51,15 @@ impl Validator {
         if let Some(ref compat) = skill.metadata.compatibility {
             self.validate_compatibility(compat, &mut result.errors);
         }
+        if let Some(ref license) = skill.metadata.license {
+            self.validate_license(license, &mut result.errors);
+        }
+        if let Some(ref tools) = skill.metadata.allowed_tools {
+            self.validate_allowed_tools(tools, &mut result.errors);
+        }
+
+        // Validate no extra fields
+        self.validate_extra_fields(skill, &mut result.errors);
     }
 
     /// Validate the name field
@@ -59,8 +71,11 @@ impl Validator {
     ) {
         const MAX_NAME_LEN: usize = 64;
 
+        // Normalize to NFKC (match Python's unicodedata.normalize("NFKC", name))
+        let normalized_name: String = name.nfkc().collect();
+
         // Length check
-        if name.is_empty() {
+        if normalized_name.is_empty() {
             errors.push(ValidationError {
                 kind: ValidationErrorKind::MissingRequiredField,
                 message: "Name cannot be empty".into(),
@@ -69,34 +84,34 @@ impl Validator {
             return;
         }
 
-        if name.len() > MAX_NAME_LEN {
+        if normalized_name.len() > MAX_NAME_LEN {
             errors.push(ValidationError {
                 kind: ValidationErrorKind::InvalidFieldValue,
                 message: format!(
                     "Name exceeds {} characters (got {})",
                     MAX_NAME_LEN,
-                    name.len()
+                    normalized_name.len()
                 ),
                 location: None,
             });
         }
 
         // Lowercase check
-        if name != name.to_lowercase() {
+        if normalized_name != normalized_name.to_lowercase() {
             errors.push(ValidationError {
                 kind: ValidationErrorKind::InvalidFieldValue,
-                message: format!("Name must be lowercase (got '{}')", name),
+                message: format!("Name must be lowercase (got '{}')", normalized_name),
                 location: None,
             });
         }
 
-        // Character validation
-        for c in name.chars() {
-            if !(c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-') {
+        // Character validation - support Unicode letters, digits, and hyphens
+        for c in normalized_name.chars() {
+            if !(c.is_alphabetic() || c.is_numeric() || c == '-') {
                 errors.push(ValidationError {
                     kind: ValidationErrorKind::InvalidFieldValue,
                     message: format!(
-                        "Invalid character '{}' in name. Only lowercase letters, digits, and hyphens allowed",
+                        "Invalid character '{}' in name. Only letters, digits, and hyphens allowed",
                         c
                     ),
                     location: None,
@@ -106,7 +121,7 @@ impl Validator {
         }
 
         // Hyphen rules
-        if name.starts_with('-') {
+        if normalized_name.starts_with('-') {
             errors.push(ValidationError {
                 kind: ValidationErrorKind::InvalidFieldValue,
                 message: "Name cannot start with hyphen".into(),
@@ -114,7 +129,7 @@ impl Validator {
             });
         }
 
-        if name.ends_with('-') {
+        if normalized_name.ends_with('-') {
             errors.push(ValidationError {
                 kind: ValidationErrorKind::InvalidFieldValue,
                 message: "Name cannot end with hyphen".into(),
@@ -122,7 +137,7 @@ impl Validator {
             });
         }
 
-        if name.contains("--") {
+        if normalized_name.contains("--") {
             errors.push(ValidationError {
                 kind: ValidationErrorKind::InvalidFieldValue,
                 message: "Name cannot contain consecutive hyphens".into(),
@@ -130,18 +145,19 @@ impl Validator {
             });
         }
 
-        // Directory name match
+        // Directory name match - also normalize directory name
         let dir_name = skill_root
             .file_name()
             .and_then(|s| s.to_str())
-            .unwrap_or("");
+            .map(|s| s.nfkc().collect::<String>())
+            .unwrap_or_default();
 
-        if dir_name != name {
+        if dir_name != normalized_name {
             errors.push(ValidationError {
                 kind: ValidationErrorKind::NameDirectoryMismatch,
                 message: format!(
                     "Directory name '{}' does not match skill name '{}'",
-                    dir_name, name
+                    dir_name, normalized_name
                 ),
                 location: None,
             });
@@ -178,6 +194,15 @@ impl Validator {
     fn validate_compatibility(&self, compat: &str, errors: &mut Vec<ValidationError>) {
         const MAX_COMPAT_LEN: usize = 500;
 
+        if compat.is_empty() {
+            errors.push(ValidationError {
+                kind: ValidationErrorKind::InvalidFieldValue,
+                message: "Compatibility field cannot be empty".into(),
+                location: None,
+            });
+            return;
+        }
+
         if compat.len() > MAX_COMPAT_LEN {
             errors.push(ValidationError {
                 kind: ValidationErrorKind::InvalidFieldValue,
@@ -185,6 +210,41 @@ impl Validator {
                     "Compatibility exceeds {} characters (got {})",
                     MAX_COMPAT_LEN,
                     compat.len()
+                ),
+                location: None,
+            });
+        }
+    }
+
+    /// Validate the license field
+    fn validate_license(&self, _license: &str, _errors: &mut Vec<ValidationError>) {
+        // No validation required per spec - license is optional and has no constraints
+    }
+
+    /// Validate the allowed-tools field
+    fn validate_allowed_tools(&self, _tools: &str, _errors: &mut Vec<ValidationError>) {
+        // No validation required per spec - allowed-tools is optional and has no constraints
+    }
+
+    /// Validate that no extra fields are present in frontmatter
+    fn validate_extra_fields(&self, skill: &Skill, errors: &mut Vec<ValidationError>) {
+        let allowed: HashSet<&str> = ALLOWED_FRONTMATTER_FIELDS.iter().copied().collect();
+
+        let extra: Vec<String> = skill
+            .metadata
+            .all_fields
+            .iter()
+            .filter(|f| !allowed.contains(f.as_str()))
+            .cloned()
+            .collect();
+
+        if !extra.is_empty() {
+            errors.push(ValidationError {
+                kind: ValidationErrorKind::InvalidFieldValue,
+                message: format!(
+                    "Unexpected fields in frontmatter: {}. Only {:?} are allowed",
+                    extra.join(", "),
+                    ALLOWED_FRONTMATTER_FIELDS
                 ),
                 location: None,
             });
@@ -223,6 +283,12 @@ mod tests {
     use std::path::PathBuf;
 
     fn make_skill(name: &str, description: &str, dir: &str) -> Skill {
+        use std::collections::HashSet;
+
+        let mut all_fields = HashSet::new();
+        all_fields.insert("name".to_string());
+        all_fields.insert("description".to_string());
+
         Skill {
             root: PathBuf::from(dir),
             skill_md_path: PathBuf::from(format!("{}/SKILL.md", dir)),
@@ -233,6 +299,7 @@ mod tests {
                 compatibility: None,
                 allowed_tools: None,
                 metadata: HashMap::new(),
+                all_fields,
             },
         }
     }
@@ -386,5 +453,79 @@ mod tests {
         let errors = validate_uniqueness(&skills);
         assert_eq!(errors.len(), 1);
         assert!(errors[0].message.contains("duplicated"));
+    }
+
+    #[test]
+    fn test_unicode_skill_name() {
+        let validator = Validator::new(ValidationConfig {
+            strict: false,
+            check_spec: true,
+            check_markdown: false,
+        });
+
+        let skill = make_skill("café-skill", "A café skill", "café-skill");
+        let result = validator.validate_skill(&skill);
+        assert!(result.is_valid(), "Unicode names should be allowed");
+    }
+
+    #[test]
+    fn test_unicode_normalization() {
+        use unicode_normalization::UnicodeNormalization;
+        let validator = Validator::new(ValidationConfig {
+            strict: false,
+            check_spec: true,
+            check_markdown: false,
+        });
+
+        // café with composed é
+        let name1 = "café";
+        // café with decomposed e + combining acute accent
+        let name2 = "cafe\u{0301}";
+
+        // Both should normalize to the same thing
+        assert_eq!(name1.nfkc().collect::<String>(), name2.nfkc().collect::<String>());
+
+        let skill = make_skill(name1, "Test", name1);
+        let result = validator.validate_skill(&skill);
+        assert!(result.is_valid());
+    }
+
+    #[test]
+    fn test_extra_fields_rejected() {
+        use std::collections::HashSet;
+
+        let validator = Validator::new(ValidationConfig {
+            strict: false,
+            check_spec: true,
+            check_markdown: false,
+        });
+
+        let mut all_fields = HashSet::new();
+        all_fields.insert("name".to_string());
+        all_fields.insert("description".to_string());
+        all_fields.insert("unknown_field".to_string()); // Extra field
+
+        let skill = Skill {
+            root: PathBuf::from("test-skill"),
+            skill_md_path: PathBuf::from("test-skill/SKILL.md"),
+            metadata: SkillMetadata {
+                name: "test-skill".to_string(),
+                description: "Test".to_string(),
+                license: None,
+                compatibility: None,
+                allowed_tools: None,
+                metadata: HashMap::new(),
+                all_fields,
+            },
+        };
+
+        let result = validator.validate_skill(&skill);
+        assert!(!result.is_valid());
+        assert!(
+            result
+                .errors
+                .iter()
+                .any(|e| e.message.contains("Unexpected fields"))
+        );
     }
 }
