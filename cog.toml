@@ -25,7 +25,7 @@ cargo clippy -- -D warnings
 [git_hooks.pre-push]
 script = """#!/bin/sh
 set -e
-cargo test
+cargo nextest run
 """
 
 [changelog]
