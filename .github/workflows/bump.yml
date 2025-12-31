@@ -28,6 +28,9 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Set the default
+          echo "bumpable=false" >> "$GITHUB_OUTPUT"
+
           if git describe --tags --abbrev=0 >/dev/null 2>&1; then
             base="$(git describe --tags --abbrev=0)"
             range="${base}..HEAD"
@@ -39,8 +42,6 @@ jobs:
 
           if printf '%s\n' "$log" | grep -Eq '^(feat|fix|perf)(\([^)]+\))?(!)?:'; then
             echo "bumpable=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "bumpable=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Rust toolchain
