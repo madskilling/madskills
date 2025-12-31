@@ -69,7 +69,7 @@ jobs:
         uses: cocogitto/cocogitto-action@v4
         with:
           command: bump
-          args: --auto
+          args: --auto -vvv
           git-user: ${{ github.actor }}
           git-user-email: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
 
