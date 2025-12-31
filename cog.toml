@@ -3,11 +3,12 @@
 ignore_merge_commits = true
 branch_whitelist = ["main"]
 
-pre_bump_hooks = [
-  "cargo set-version {{version}}",
-  "cargo check --release",
-  "git add :/Cargo.lock",
-]
+# Temporarily disabled to debug cog failure
+# pre_bump_hooks = [
+#   "cargo set-version {{version}}",
+#   "cargo check --release",
+#   "git add :/Cargo.lock",
+# ]
 
 [git_hooks.commit-msg]
 script = """#!/bin/sh
