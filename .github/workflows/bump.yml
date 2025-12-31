@@ -61,42 +61,31 @@ jobs:
         if: steps.bump-check.outputs.bumpable == 'true'
         uses: ./.github/actions/setup-cargo-tools
         with:
-          binstall-tools: cargo-edit
-
-      - name: Verify cargo-edit installed
-        if: steps.bump-check.outputs.bumpable == 'true'
-        run: |
-          echo "Cargo bin PATH: $HOME/.cargo/bin"
-          ls -la "$HOME/.cargo/bin/" || true
-          which cargo-set-version || echo "cargo-set-version not in PATH"
-          cargo set-version --help || echo "cargo-edit not working"
+          binstall-tools: cargo-edit cocogitto
 
       - name: Add cargo bin to PATH
         if: steps.bump-check.outputs.bumpable == 'true'
         run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
-      - name: Debug environment before cog
+      - name: Configure git
         if: steps.bump-check.outputs.bumpable == 'true'
         run: |
-          echo "PWD: $(pwd)"
-          echo "Git status:"
-          git status
-          echo "cog.toml exists:"
-          test -f cog.toml && echo "YES" || echo "NO"
-          echo "PATH:"
-          echo "$PATH" | tr ':' '\n'
-          echo "cargo-set-version available:"
-          which cargo-set-version || echo "NOT IN PATH"
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
 
-      - name: Semver release
+      - name: Run cog bump
         id: release
         if: steps.bump-check.outputs.bumpable == 'true'
-        uses: cocogitto/cocogitto-action@v4
-        with:
-          command: bump
-          args: --auto -vvv
-          git-user: ${{ github.actor }}
-          git-user-email: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
+        run: |
+          set -euo pipefail
+
+          echo "Running cog bump with full output capture..."
+          cog -vvv bump --auto 2>&1 | tee cog-output.txt
+
+          # Extract the new version from the git tag just created
+          version=$(git describe --tags --abbrev=0)
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "Bumped to version: ${version}"
 
       - name: Print version
         if: steps.bump-check.outputs.bumpable == 'true'
