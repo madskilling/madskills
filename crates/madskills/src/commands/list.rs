@@ -90,3 +90,52 @@ pub fn cmd_list(args: ListArgs, _quiet: bool) -> Result<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_format_enum_variants() {
+        // Test that Format enum has both variants
+        let text = Format::Text;
+        let json = Format::Json;
+
+        // Ensure they can be cloned
+        let _text_clone = text;
+        let _json_clone = json;
+    }
+
+    #[test]
+    fn test_list_args_defaults() {
+        // Test that default values are set correctly
+        let args = ListArgs {
+            path: PathBuf::from("."),
+            format: Format::Text,
+            long: false,
+            include: vec![],
+            exclude: vec![],
+        };
+
+        assert_eq!(args.path, PathBuf::from("."));
+        assert!(!args.long);
+        assert!(args.include.is_empty());
+        assert!(args.exclude.is_empty());
+    }
+
+    #[test]
+    fn test_list_args_with_options() {
+        let args = ListArgs {
+            path: PathBuf::from("/custom/path"),
+            format: Format::Json,
+            long: true,
+            include: vec!["**/*.md".to_string()],
+            exclude: vec!["**/node_modules/**".to_string()],
+        };
+
+        assert_eq!(args.path, PathBuf::from("/custom/path"));
+        assert!(args.long);
+        assert_eq!(args.include.len(), 1);
+        assert_eq!(args.exclude.len(), 1);
+    }
+}

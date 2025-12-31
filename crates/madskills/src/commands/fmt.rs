@@ -239,4 +239,153 @@ name: test-skill
         // Should reorder fields: name first, then description
         assert!(normalized.contains("name: test-skill\ndescription: Test skill\n"));
     }
+
+    #[test]
+    fn test_normalize_frontmatter_with_all_fields() {
+        let content = r#"---
+name: full-skill
+description: A complete skill
+license: MIT
+compatibility: claude-code
+allowed-tools: Read, Write
+---
+# Full Content
+"#;
+        let path = PathBuf::from("test.md");
+        let normalized = normalize_frontmatter(content, &path).unwrap();
+
+        assert!(normalized.contains("name: full-skill\n"));
+        assert!(normalized.contains("description: A complete skill\n"));
+        assert!(normalized.contains("license: MIT\n"));
+        assert!(normalized.contains("compatibility: claude-code\n"));
+        assert!(normalized.contains("allowed-tools: Read, Write\n"));
+        assert!(normalized.contains("# Full Content"));
+    }
+
+    #[test]
+    fn test_normalize_frontmatter_with_metadata() {
+        let content = r#"---
+name: metadata-skill
+description: Skill with metadata
+metadata:
+  author: Test Author
+  version: 1.0.0
+---
+# Content with metadata
+"#;
+        let path = PathBuf::from("test.md");
+        let normalized = normalize_frontmatter(content, &path).unwrap();
+
+        assert!(normalized.contains("name: metadata-skill\n"));
+        assert!(normalized.contains("description: Skill with metadata\n"));
+        assert!(normalized.contains("metadata:\n"));
+        assert!(normalized.contains("  author: Test Author\n"));
+        assert!(normalized.contains("  version: 1.0.0\n"));
+    }
+
+    #[test]
+    fn test_normalize_frontmatter_preserves_markdown() {
+        let content = r#"---
+name: preserve-test
+description: Test preservation
+---
+# Header
+
+This is some **markdown** content with:
+- Lists
+- And other formatting
+
+```rust
+fn example() {}
+```
+"#;
+        let path = PathBuf::from("test.md");
+        let normalized = normalize_frontmatter(content, &path).unwrap();
+
+        assert!(normalized.contains("# Header"));
+        assert!(normalized.contains("This is some **markdown** content"));
+        assert!(normalized.contains("- Lists"));
+        assert!(normalized.contains("```rust"));
+        assert!(normalized.contains("fn example() {}"));
+    }
+
+    #[test]
+    fn test_normalize_frontmatter_empty_markdown() {
+        let content = r#"---
+name: empty-markdown
+description: No markdown content
+---
+"#;
+        let path = PathBuf::from("test.md");
+        let normalized = normalize_frontmatter(content, &path).unwrap();
+
+        assert!(normalized.contains("name: empty-markdown\n"));
+        assert!(normalized.contains("description: No markdown content\n"));
+        assert!(normalized.ends_with("---\n"));
+    }
+
+    #[test]
+    fn test_normalize_frontmatter_windows_line_endings() {
+        let content = "---\r\nname: windows-skill\r\ndescription: Windows line endings\r\n---\r\n# Content\r\n";
+        let path = PathBuf::from("test.md");
+        let normalized = normalize_frontmatter(content, &path).unwrap();
+
+        assert!(normalized.contains("name: windows-skill\n"));
+        assert!(normalized.contains("description: Windows line endings\n"));
+    }
+
+    #[test]
+    fn test_format_enum_variants() {
+        let text = Format::Text;
+        let json = Format::Json;
+
+        // Ensure they can be cloned
+        let _text_clone = text;
+        let _json_clone = json;
+    }
+
+    #[test]
+    fn test_fmt_args_defaults() {
+        let args = FmtArgs {
+            path: PathBuf::from("."),
+            check: false,
+            format: Format::Text,
+            include: vec![],
+            exclude: vec![],
+            no_mdlint: false,
+            no_frontmatter: false,
+            mdlint_config: None,
+        };
+
+        assert_eq!(args.path, PathBuf::from("."));
+        assert!(!args.check);
+        assert!(!args.no_mdlint);
+        assert!(!args.no_frontmatter);
+        assert!(args.include.is_empty());
+        assert!(args.exclude.is_empty());
+        assert!(args.mdlint_config.is_none());
+    }
+
+    #[test]
+    fn test_fmt_args_with_options() {
+        let config_path = PathBuf::from("/custom/config.yml");
+        let args = FmtArgs {
+            path: PathBuf::from("/custom/path"),
+            check: true,
+            format: Format::Json,
+            include: vec!["**/*.md".to_string()],
+            exclude: vec!["**/node_modules/**".to_string()],
+            no_mdlint: true,
+            no_frontmatter: true,
+            mdlint_config: Some(config_path.clone()),
+        };
+
+        assert_eq!(args.path, PathBuf::from("/custom/path"));
+        assert!(args.check);
+        assert!(args.no_mdlint);
+        assert!(args.no_frontmatter);
+        assert_eq!(args.include.len(), 1);
+        assert_eq!(args.exclude.len(), 1);
+        assert_eq!(args.mdlint_config, Some(config_path));
+    }
 }
