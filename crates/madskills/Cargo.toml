@@ -19,6 +19,11 @@ pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ target }.{ archive
 bin-dir = "{ bin }{ binary-ext }"
 pkg-fmt = "tgz"
 
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-v{ version }-{ target }.zip"
+pkg-fmt = "zip"
+bin-dir = "{ bin }{ binary-ext }"
+
 [dependencies]
 madskills-core = { path = "../madskills-core" }
 clap = { version = "4.5", features = ["derive"] }
