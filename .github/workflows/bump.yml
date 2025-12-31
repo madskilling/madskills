@@ -73,6 +73,10 @@ jobs:
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
 
+      - name: Check cog version
+        if: steps.bump-check.outputs.bumpable == 'true'
+        run: cog --version
+
       - name: Run cog bump
         id: release
         if: steps.bump-check.outputs.bumpable == 'true'
@@ -86,6 +90,14 @@ jobs:
           version=$(git describe --tags --abbrev=0)
           echo "version=${version}" >> "$GITHUB_OUTPUT"
           echo "Bumped to version: ${version}"
+
+      - name: Upload cog output
+        if: steps.bump-check.outputs.bumpable == 'true' && always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: cog-output
+          path: cog-output.txt
+          retention-days: 7
 
       - name: Print version
         if: steps.bump-check.outputs.bumpable == 'true'
