@@ -85,14 +85,17 @@ fn test_lint_name_directory_mismatch() {
 #[test]
 fn test_lint_duplicate_names() {
     let temp = TempDir::new().unwrap();
+    // Both skills in same detected directory (.github/skills is first priority)
     let skill_dir1 = temp.path().join(".github/skills/test-skill");
-    let skill_dir2 = temp.path().join(".claude/skills/test-skill");
+    let skill_dir2 = temp.path().join(".github/skills/test-skill-copy");
     fs::create_dir_all(&skill_dir1).unwrap();
     fs::create_dir_all(&skill_dir2).unwrap();
 
-    let skill_content = "---\nname: test-skill\ndescription: Test\n---\n# Test\n";
-    fs::write(skill_dir1.join("SKILL.md"), skill_content).unwrap();
-    fs::write(skill_dir2.join("SKILL.md"), skill_content).unwrap();
+    // Both have same name but different directories
+    let skill_content1 = "---\nname: test-skill\ndescription: Test\n---\n# Test\n";
+    let skill_content2 = "---\nname: test-skill\ndescription: Test\n---\n# Test\n";
+    fs::write(skill_dir1.join("SKILL.md"), skill_content1).unwrap();
+    fs::write(skill_dir2.join("SKILL.md"), skill_content2).unwrap();
 
     let mut cmd = Command::cargo_bin("madskills").unwrap();
     cmd.arg("lint")
@@ -149,6 +152,9 @@ fn test_list_skills() {
 fn test_init_creates_skill() {
     let temp = TempDir::new().unwrap();
 
+    // Create .github directory to trigger fallback to .github/skills
+    fs::create_dir_all(temp.path().join(".github")).unwrap();
+
     let mut cmd = Command::cargo_bin("madskills").unwrap();
     cmd.arg("init")
         .arg("new-skill")
@@ -167,20 +173,43 @@ fn test_init_creates_skill() {
 }
 
 #[test]
-fn test_init_legacy_location() {
+fn test_init_auto_detects_claude_location() {
+    let temp = TempDir::new().unwrap();
+
+    // Create .claude/skills to establish it as the detected location
+    fs::create_dir_all(temp.path().join(".claude/skills")).unwrap();
+
+    let mut cmd = Command::cargo_bin("madskills").unwrap();
+    cmd.arg("init")
+        .arg("auto-skill")
+        .arg("--root")
+        .arg(temp.path())
+        .assert()
+        .success();
+
+    let skill_dir = temp.path().join(".claude/skills/auto-skill");
+    assert!(skill_dir.join("SKILL.md").exists());
+}
+
+#[test]
+fn test_init_respects_dir_override() {
     let temp = TempDir::new().unwrap();
 
     let mut cmd = Command::cargo_bin("madskills").unwrap();
     cmd.arg("init")
-        .arg("legacy-skill")
+        .arg("custom-skill")
         .arg("--root")
         .arg(temp.path())
-        .arg("--legacy")
+        .arg("--dir")
+        .arg(temp.path().join("custom/location/custom-skill"))
         .assert()
         .success();
 
-    let skill_dir = temp.path().join(".claude/skills/legacy-skill");
-    assert!(skill_dir.join("SKILL.md").exists());
+    assert!(
+        temp.path()
+            .join("custom/location/custom-skill/SKILL.md")
+            .exists()
+    );
 }
 
 #[test]

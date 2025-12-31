@@ -57,8 +57,8 @@ pub struct SkillMetadata {
 pub struct DiscoveryConfig {
     /// Root path to search from
     pub root_path: PathBuf,
-    /// Include legacy .claude/skills paths
-    pub include_legacy: bool,
+    /// Auto-detected skills base directory
+    pub skills_base_path: PathBuf,
     /// Additional glob patterns to include
     pub include_patterns: Vec<String>,
     /// Glob patterns to exclude

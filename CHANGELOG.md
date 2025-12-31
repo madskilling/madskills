@@ -6,6 +6,17 @@ The format is based on *Keep a Changelog*, and this project adheres to *Semantic
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- **Smart skill directory detection** replaces `--legacy`/`--no-legacy` flags
+  - Automatically detects skills using priority-based algorithm:
+    1. `AGENT_SKILLS_DIR` environment variable
+    2. Path referenced in `AGENTS.md` file (searches for `/skills` pattern)
+    3. Well-known directories (`.github/skills/`, `.claude/skills/`, `.codex/skills/`)
+    4. Fallback: `.github/skills/` if `.github/` exists, otherwise `./skills/`
+  - Home directory (`~`) expansion supported in AGENTS.md and `AGENT_SKILLS_DIR`
+  - First match only (no directory merging)
+
 ### Added
 
 - **Phase 0**: AgentSkills spec validation compliance
@@ -25,14 +36,18 @@ The format is based on *Keep a Changelog*, and this project adheres to *Semantic
   - `--no-frontmatter` flag to disable frontmatter normalization in fmt command
   - `--mdlint-config` flag for custom markdown formatting configuration
   - Sequential formatting: frontmatter normalization followed by markdown fixes
+- `AGENT_SKILLS_DIR` environment variable for explicit directory override
 
 ### Changed
 
 - Renamed `--no-rumdl` flag to `--no-mdlint` for consistency
+- `DiscoveryConfig` struct: replaced `include_legacy: bool` with `skills_base_path: PathBuf`
 
 ### Removed
 
 - `madskills-rules` crate (was an unused placeholder)
+- `--legacy` flag from `init` command (use `--dir` for explicit location or `AGENT_SKILLS_DIR`)
+- `--no-legacy` flag from `lint`, `fmt`, and `list` commands (auto-detection replaces this)
 
 ## [0.1.0] - 2025-12-30
 
