@@ -19,10 +19,6 @@ pub struct ListArgs {
     #[arg(long)]
     pub long: bool,
 
-    /// Do not scan .claude/skills
-    #[arg(long)]
-    pub no_legacy: bool,
-
     /// Additional SKILL.md glob(s) to include (repeatable)
     #[arg(long)]
     pub include: Vec<String>,
@@ -39,10 +35,13 @@ pub enum Format {
 }
 
 pub fn cmd_list(args: ListArgs, _quiet: bool) -> Result<()> {
+    // Detect skills directory
+    let skills_base = madskills_core::discovery::detect_skills_directory(&args.path)?;
+
     // Discover skills
     let config = DiscoveryConfig {
         root_path: args.path,
-        include_legacy: !args.no_legacy,
+        skills_base_path: skills_base,
         include_patterns: args.include,
         exclude_patterns: args.exclude,
     };

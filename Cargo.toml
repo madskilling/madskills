@@ -65,25 +65,23 @@ strip = false
 # The preferred dist version to use in CI (Cargo.toml SemVer syntax)
 cargo-dist-version = "0.30.3"
 # CI backends to support
-ci = ["github"]
+ci = "github"
 # The installers to generate for each app
 installers = ["homebrew"]
 # Target platforms to build apps for (Rust target-triple syntax)
-targets = [
-  "x86_64-unknown-linux-gnu",
-  "aarch64-unknown-linux-gnu",
-  "x86_64-apple-darwin",
-  "x86_64-pc-windows-msvc",
-  "aarch64-apple-darwin",
-]
+targets = ["aarch64-apple-darwin", "aarch64-unknown-linux-gnu", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
+# A GitHub repo to push Homebrew formulas to
 tap = "madskilling/homebrew-brew"
+# Publish jobs to run in CI
 publish-jobs = ["homebrew"]
-# if yaml format issues continue to be a problem, turn this on
-# allow-dirty = ["ci"]
+# Extra static files to include in each App (path relative to this Cargo.toml's dir)
 include = ["dist/share"]
 github-build-setup = "../dist-build-setup.yml"
+# Which actions to run on pull requests
 pr-run-mode = "upload"
+# Which phase dist should use to create the GitHub release
 github-release = "auto"
+# Whether to embed dependency information using cargo-auditable
 cargo-auditable = true
 
 [workspace.metadata.dist.github-action-commits]

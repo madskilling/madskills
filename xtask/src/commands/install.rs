@@ -78,6 +78,7 @@ fn expand_tilde(path: &str) -> Result<PathBuf, String> {
     Ok(PathBuf::from(path))
 }
 
+#[cfg_attr(not(unix), allow(unused_variables))]
 fn set_executable(path: &Path) -> Result<(), String> {
     #[cfg(unix)]
     {
