@@ -7,6 +7,13 @@ on:
       - main
     tags-ignore:
       - '*'
+    paths-ignore:
+      - '**.md'
+      - '.github/workflows/**'
+      - '.github/actions/**'
+      - 'docs/**'
+      - 'cog.toml'
+      - '.gitignore'
 
 permissions:
   contents: write
