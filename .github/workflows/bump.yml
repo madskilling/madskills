@@ -75,6 +75,19 @@ jobs:
         if: steps.bump-check.outputs.bumpable == 'true'
         run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
+      - name: Debug environment before cog
+        if: steps.bump-check.outputs.bumpable == 'true'
+        run: |
+          echo "PWD: $(pwd)"
+          echo "Git status:"
+          git status
+          echo "cog.toml exists:"
+          test -f cog.toml && echo "YES" || echo "NO"
+          echo "PATH:"
+          echo "$PATH" | tr ':' '\n'
+          echo "cargo-set-version available:"
+          which cargo-set-version || echo "NOT IN PATH"
+
       - name: Semver release
         id: release
         if: steps.bump-check.outputs.bumpable == 'true'
