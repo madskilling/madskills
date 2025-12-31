@@ -25,7 +25,7 @@ cargo clippy -- -D warnings
 [git_hooks.pre-push]
 script = """#!/bin/sh
 set -e
-cargo test
+cargo nextest run
 """
 
 [changelog]
@@ -39,3 +39,7 @@ authors = [{ signature = "Clay Loveless", username = "claylo" }]
 [commit_types]
 chore = { changelog_title = "", omit_from_changelog = true }
 ci = { changelog_title = "", omit_from_changelog = true }
+
+[packages]
+madskills = { path = "crates/madskills" }
+madskills-core = { path = "crates/madskills-core" }

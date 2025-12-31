@@ -37,9 +37,7 @@ jobs:
 
           log="$(git log --no-merges --format=%B "$range")"
 
-          if printf '%s\n' "$log" | grep -Eq '^(feat|fix|perf)(\([^)]+\))?(!)?:' \
-            || printf '%s\n' "$log" | grep -Eq '^[a-zA-Z0-9_-]+(\([^)]+\))?!:' \
-            || printf '%s\n' "$log" | grep -Eq 'BREAKING CHANGE'; then
+          if printf '%s\n' "$log" | grep -Eq '^(feat|fix|perf)(\([^)]+\))?(!)?:'; then
             echo "bumpable=true" >> "$GITHUB_OUTPUT"
           else
             echo "bumpable=false" >> "$GITHUB_OUTPUT"
