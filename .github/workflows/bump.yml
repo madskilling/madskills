@@ -63,6 +63,14 @@ jobs:
         with:
           binstall-tools: cargo-edit
 
+      - name: Verify cargo-edit installed
+        if: steps.bump-check.outputs.bumpable == 'true'
+        run: |
+          echo "Cargo bin PATH: $HOME/.cargo/bin"
+          ls -la "$HOME/.cargo/bin/" || true
+          which cargo-set-version || echo "cargo-set-version not in PATH"
+          cargo set-version --help || echo "cargo-edit not working"
+
       - name: Semver release
         id: release
         if: steps.bump-check.outputs.bumpable == 'true'
@@ -72,6 +80,8 @@ jobs:
           args: --auto -vvv
           git-user: ${{ github.actor }}
           git-user-email: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
+        env:
+          PATH: ${{ env.PATH }}:$HOME/.cargo/bin
 
       - name: Print version
         if: steps.bump-check.outputs.bumpable == 'true'
