@@ -219,8 +219,8 @@ mod tests {
         writeln!(file, "No formatting issues here.")?;
 
         let changed = format_markdown(file.path(), false, None)?;
-        // May or may not have changes depending on rumdl rules
-        assert!(changed == true || changed == false);
+        // Always returns a boolean (just exercise the code path)
+        let _ = changed;
 
         Ok(())
     }

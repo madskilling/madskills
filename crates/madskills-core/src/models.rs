@@ -586,7 +586,7 @@ description: Minimal test skill
 
     #[test]
     fn test_validation_error_kinds() {
-        let kinds = vec![
+        let kinds = [
             ValidationErrorKind::MissingSkillMd,
             ValidationErrorKind::FrontmatterParseError,
             ValidationErrorKind::MissingRequiredField,
@@ -610,7 +610,7 @@ description: Minimal test skill
 
     #[test]
     fn test_validation_warning_kinds() {
-        let kinds = vec![
+        let kinds = [
             ValidationWarningKind::MarkdownLintWarning,
             ValidationWarningKind::MissingOptionalFile,
             ValidationWarningKind::DeprecatedField,
