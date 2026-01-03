@@ -10,10 +10,11 @@ pre_bump_hooks = [
 ]
 
 [git_hooks.commit-msg]
-script = """#!/bin/sh
+script = '''#!/bin/sh
 set -e
+perl -i -ne 'print unless /Generated with \[Claude Code\]\(https:\/\/claude\.com\/claude-code\)/ || /^Co-Authored-By: Claude/' "$1"
 cog verify --file "$1"
-"""
+'''
 
 [git_hooks.pre-commit]
 script = """#!/bin/sh
