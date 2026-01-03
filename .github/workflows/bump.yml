@@ -84,6 +84,7 @@ jobs:
         if: steps.bump-check.outputs.bumpable == 'true'
         run: cog --version
 
+      # cog post-bump config does the git commit and push
       - name: Run cog bump
         id: release
         if: steps.bump-check.outputs.bumpable == 'true'
@@ -94,7 +95,7 @@ jobs:
           cog -vvv bump --auto 2>&1 | tee cog-output.txt
 
           # Extract the new version from the git tag just created
-          version=$(git describe --tags --abbrev=0)
+          version=$(git tag --sort=-v:refname | awk 'NF{print; exit}')
           echo "version=${version}" >> "$GITHUB_OUTPUT"
           echo "Bumped to version: ${version}"
 
@@ -109,10 +110,6 @@ jobs:
       - name: Print version
         if: steps.bump-check.outputs.bumpable == 'true'
         run: echo "${{ steps.release.outputs.version }}"
-
-      - name: Push release commit and tag
-        if: steps.bump-check.outputs.bumpable == 'true'
-        run: git push --follow-tags
 
       - name: Skip bump (no releasable commits)
         if: steps.bump-check.outputs.bumpable != 'true'

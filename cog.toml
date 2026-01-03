@@ -2,12 +2,26 @@
 
 ignore_merge_commits = true
 branch_whitelist = ["main"]
+tag_prefix = "v"
 
+# pre_bump_hooks = [
+#   "cargo set-version {{version}}",
+#   "cargo check --release",
+#   "git add :/Cargo.lock",
+# ]
 pre_bump_hooks = [
-  "cargo set-version {{version}}",
-  "cargo check --release",
-  "git add :/Cargo.lock",
+  "cargo nextest run --profile ci",
+  "cargo clippy --all-targets --all-features -- -D warnings",
+  "cargo fmt --all",
+  "cargo build --release",                                    # final check
 ]
+
+post_bump_hooks = ["git push", "git push origin --tags"]
+
+# pre_package_bump_hooks = [
+#   "echo 'upgrading {{package}}' to {{version}}",
+#   "cargo set-version {{version}}",
+# ]
 
 [git_hooks.commit-msg]
 script = '''#!/bin/sh
@@ -42,5 +56,5 @@ chore = { changelog_title = "", omit_from_changelog = true }
 ci = { changelog_title = "", omit_from_changelog = true }
 
 [packages]
-madskills = { path = "crates/madskills" }
-madskills-core = { path = "crates/madskills-core" }
+madskills = { path = "crates/madskills", bump_order = 2 }
+madskills-core = { path = "crates/madskills-core", bump_order = 1 }
