@@ -2,6 +2,19 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## madskills-core-v0.1.0 - 2026-01-03
+#### Features
+- smart skill directory detection (#9) - (eb86a4d) - *claylo*
+- implement best practices validation (AS001-AS020) (#5) - (3ae4aa6) - *claylo*
+- integrate markdown formatting into fmt command (Phase 2) (#4) - (412b23d) - *claylo*
+- integrate markdown linting (Phase 1) (#3) - (6740e1c) - *claylo*
+- Phase 0 - AgentSkills spec validation compliance (#2) - (75200df) - *claylo*
+- implement madskills CLI for Agent Skills validation (#1) - (fa34911) - *claylo*
+#### Bug Fixes
+- use correct flow for bumping (#15) - (e19fa01) - *claylo*
+
+- - -
+
 
 ## madskills-core-0.1.0 - 2025-12-31
 #### Features

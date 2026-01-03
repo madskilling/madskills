@@ -50,6 +50,28 @@ The format is based on *Keep a Changelog*, and this project adheres to *Semantic
 - `--no-legacy` flag from `lint`, `fmt`, and `list` commands (auto-detection replaces this)
 
 - - -
+## [v0.2.0](https://github.com/madskilling/madskills/compare/eb86a4d49ccd87a7656c90cdc3f43106c7fc11da..v0.2.0) - 2026-01-03
+### Package updates
+- [madskills-core](crates/madskills-core) bumped to [madskills-core-v0.1.0](https://github.com/madskilling/madskills/compare/2eaa2119ea7063c98cf900d0b75e292490b01a5e..madskills-core-v0.1.0)
+- [madskills](crates/madskills) bumped to [madskills-v0.1.0](https://github.com/madskilling/madskills/compare/2eaa2119ea7063c98cf900d0b75e292490b01a5e..madskills-v0.1.0)
+### Global changes
+#### Features
+- skip bump workflow for non-code changes - ([53ae1ab](https://github.com/madskilling/madskills/commit/53ae1ab79a1fb6a53262deb688393b25fd442a71)) - [@claylo](https://github.com/claylo)
+- add cog version check and output artifact to bump workflow - ([68869e1](https://github.com/madskilling/madskills/commit/68869e1a2b0f19eb586f66499256161994f8d04d)) - [@claylo](https://github.com/claylo)
+- automate crates.io publishing with cargo-dist - ([9687259](https://github.com/madskilling/madskills/commit/9687259ec4b56c0208e2730bf6498fd8276c0db7)) - [@claylo](https://github.com/claylo)
+- smart skill directory detection (#9) - ([eb86a4d](https://github.com/madskilling/madskills/commit/eb86a4d49ccd87a7656c90cdc3f43106c7fc11da)) - [@claylo](https://github.com/claylo)
+#### Bug Fixes
+- use correct flow for bumping (#15) - ([e19fa01](https://github.com/madskilling/madskills/commit/e19fa01cae693b5fc455601ab5548291d129b1ea)) - [@claylo](https://github.com/claylo)
+- re-enable pre_bump_hooks for proper version bumping - ([0821bda](https://github.com/madskilling/madskills/commit/0821bda961cd8b51263ee2abcc49f02a1e9b0675)) - [@claylo](https://github.com/claylo)
+- add cog separator to CHANGELOG.md - ([1d0bfcb](https://github.com/madskilling/madskills/commit/1d0bfcb2c8f20f65980543d0fcbef049d2525f60)) - [@claylo](https://github.com/claylo)
+- download cargo-binstall binary instead of compiling - ([0f1ed4a](https://github.com/madskilling/madskills/commit/0f1ed4ac77628bb53186295a1a4376f39fc6aefb)) - [@claylo](https://github.com/claylo)
+- replace cocogitto-action with direct cog execution - ([1a8b170](https://github.com/madskilling/madskills/commit/1a8b170f83ba0a6f5060651fdc724538c355d753)) - [@claylo](https://github.com/claylo)
+- temporarily disable pre_bump_hooks to debug cog - ([d1e0a1e](https://github.com/madskilling/madskills/commit/d1e0a1e7b4c18a335e171fdfd2459ca2672346da)) - [@claylo](https://github.com/claylo)
+- properly add cargo bin to PATH for cog - ([b681b3e](https://github.com/madskilling/madskills/commit/b681b3ecf741bc9bc6fd4d809bce471f76eeb62c)) - [@claylo](https://github.com/claylo)
+- ensure cargo-edit is in PATH for cocogitto action - ([a28563b](https://github.com/madskilling/madskills/commit/a28563b35b39ed44d882b9706f62903d8c2f3963)) - [@claylo](https://github.com/claylo)
+
+- - -
+
 
 ## [0.1.0](https://github.com/madskilling/madskills/compare/2eaa2119ea7063c98cf900d0b75e292490b01a5e..0.1.0) - 2025-12-31
 ### Package updates
