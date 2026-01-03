@@ -22,7 +22,10 @@ doc-test:
   cargo test --doc
 
 cov:
-  cargo llvm-cov nextest --html
+  @cargo llvm-cov clean --workspace
+  cargo llvm-cov nextest --no-report
+  @cargo llvm-cov report --html
+  @cargo llvm-cov report --summary-only --json --output-path target/llvm-cov/summary.json
 
 check: fmt clippy test doc-test
 
